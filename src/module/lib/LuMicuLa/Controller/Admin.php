@@ -28,6 +28,21 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
     }
     
     
+    public function main()
+    {
+        return $this->modules();
+    }
+    
+       
+    
+    public function modifyconfig()
+    {
+        $form = FormUtil::newForm($this->name, $this);
+        return $form->execute('admin/modifyconfig.tpl', new LuMicuLa_Handler_ModifyConfig());
+    }
+    
+    
+    
     /**
      * Edit LuMicuLa module settings.
      *
@@ -66,7 +81,7 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
      * @throws Zikula_Exception_Forbidden Thrown if the current user does not have moderate access, or if the method of accessing this function is improper.
      */
     
-     public function main()
+     public function modules()
      {
         if (!SecurityUtil::checkPermission('LuMicuLa::', '::', ACCESS_ADMIN)) {
             throw new Zikula_Exception_Forbidden();
@@ -74,7 +89,7 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
         
         $all_module_settings = ModUtil::apiFunc($this->name, 'user', 'getAllModuleSettings');
         return $this->view->assign('mods', $all_module_settings)
-                          ->fetch('admin/main.tpl');
+                          ->fetch('admin/modules.tpl');
      }
 
 }

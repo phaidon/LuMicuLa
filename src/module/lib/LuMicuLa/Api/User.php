@@ -113,10 +113,12 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
             return $text;
         }
         PageUtil::addVar('stylesheet', "modules/LuMicuLa/style/transform.css");
-        PageUtil::addVar('stylesheet', "modules/LuMicuLa/lib/vendor/lightbox/css/lightbox.css");
-        PageUtil::addVar('javascript', "modules/LuMicuLa/lib/vendor/lightbox/js/lightbox-web.js");
-        PageUtil::addVar('javascript', "javascript/ajax/prototype.js");
         
+        if( $this->getVar('lightbox') ) {
+            PageUtil::addVar('javascript', "javascript/ajax/prototype.js");
+            PageUtil::addVar('stylesheet', "modules/LuMicuLa/lib/vendor/lightbox/css/lightbox.css");
+            PageUtil::addVar('javascript', "modules/LuMicuLa/lib/vendor/lightbox/js/lightbox-web.js");
+        }
         
         // Wakka workaround
         if( $this->getVar('lml') == 'Wakka') {
@@ -303,8 +305,7 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         if(empty($text)) {
             return '';
         }
-        $this->setVar('highlighter', 'syntaxhighlighter');
-        $highlighter = $this->getVar('highlighter');
+        $highlighter = $this->getVar('syntaxHighlighter');
            
         switch ($highlighter) {
             case 'geshi':

@@ -1,9 +1,4 @@
-{admincategorymenu}
-<div class="z-adminbox">
-    <h1>{$modinfo.displayname}</h1>
-</div>
-
-<div class="z-admincontainer">
+{include file="admin/header.tpl"}
 
 <div class="z-adminpageicon">{icon type="config" size="large"}</div>
 
