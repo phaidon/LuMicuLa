@@ -18,8 +18,8 @@
     </div>
 
     <div class="z-formrow">
-        {formlabel for="lightbox" __text="Javascript pop-ups for images"}
-        {formcheckbox id='lightbox'}
+        {formlabel for="imageViewer" __text="Javascript pop-ups for images"}
+        {formcheckbox id='imageViewer'}
     </div>
 
 </fieldset>

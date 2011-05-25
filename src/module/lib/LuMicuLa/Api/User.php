@@ -113,12 +113,7 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
             return $text;
         }
         PageUtil::addVar('stylesheet', "modules/LuMicuLa/style/transform.css");
-        
-        if( $this->getVar('lightbox') ) {
-            PageUtil::addVar('javascript', "javascript/ajax/prototype.js");
-            PageUtil::addVar('stylesheet', "modules/LuMicuLa/lib/vendor/lightbox/css/lightbox.css");
-            PageUtil::addVar('javascript', "modules/LuMicuLa/lib/vendor/lightbox/js/lightbox-web.js");
-        }
+
         
         // Wakka workaround
         if( $this->getVar('lml') == 'Wakka') {
@@ -183,6 +178,8 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         
         
         $message = $this->transform_codeblocks_post(array($message, $codeblocks));
+       
+        $message = $this->imageViewer($message);      
         
         return $message;
 
@@ -246,11 +243,11 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         $src = str_replace("//", "CREOLELINKREPLACEMENT", $src);
         
         if(is_null($title)) {
-            return '<a href="'.$src.'" rel="lightbox">'.
+            return '<a href="'.$src.'" rel="imageviewer">'.
                    '<img src="'.$src.'" width="250">'.
                    '</a>';
         }        
-        return '<a href="'.$src.'" rel="lightbox">'.
+        return '<a href="'.$src.'" rel="imageviewer>'.
                '<img src="'.$src.'" title="'.$title.'" alt="'.$title.'" width="250">'.
                '</a>';
     }
@@ -368,6 +365,23 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
             
         return false;
                 
+    }
+    
+    
+    public function imageViewer($message) {
+        if( $this->getVar('imageViewer') ) {
+            PageUtil::addVar('javascript', "javascript/ajax/prototype.js");
+            PageUtil::addVar('javascript', "javascript/helpers/Zikula.ImageViewer.js");
+            $message .= '<script type="text/javascript">'.
+                        'Zikula.ImageViewer.setup({'. 
+                        '     modal: true,'.
+                        '     langLabels: {'.
+                        "         close: 'Close this box',". 
+                        '     }'. 
+                        '});'.
+                        '</script>';
+        }
+        return $message;
     }
     
 }
