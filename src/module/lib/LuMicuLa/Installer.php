@@ -23,11 +23,35 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
         try {
             DoctrineUtil::createTablesFromModels('LuMicula');
         } catch (Exception $e) {
+            LogUtil::registerError($e->__toString());
             return false;
         }
+
+        $this->defaultdata();
         
+        // create hook
+        HookUtil::registerProviderBundles($this->version->getHookProviderBundles());
+
         // Initialisation successful
         return true;
+    }
+    
+    
+    /**
+     * Provide default data.
+     *
+     * @return void
+     */
+    protected function defaultdata()
+    {
+        $d = new LuMicuLa_Model_LuMicuLa();
+        $d->modname = 'Tasks';
+        $d->language = 'Creole';
+        $d->elements = array('bold' => true);
+        $d->save();
+
+        $this->setVar('imageViewer', true);
+        
     }
 
     /**
@@ -52,9 +76,11 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
     */
     public function uninstall()
     {
-        
+        DoctrineUtil::dropTable('lumicula');
         // Delete any module variables
         $this->delVars();
+        HookUtil::unregisterProviderBundles($this->version->getHookProviderBundles());
+
         // Deletion successful
         return true;
 

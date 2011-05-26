@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Copyright LuMicuLa Team 2011
  *
@@ -12,16 +11,42 @@
  * information regarding copyright and licensing.
  */
 
-class LuMicuLa_Api_Plugin extends Zikula_AbstractApi 
+class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
 {
-    
-    
-    public function editor($args)
+    /**
+     * Zikula_View instance
+     *
+     * @var Zikula_View
+     */
+    private $view;
+
+    /**
+     * Post constructor hook.
+     *
+     * @return void
+     */
+    public function setup()
     {
-        extract($args);
-        if(empty($modname)) {
-           $modname = 'Tasks';
-        }
+        $this->view = Zikula_View::getInstance("LuMicuLa");
+        $this->name = 'LuMicuLa';
+    }
+
+    /**
+     * Display hook for view.
+     *
+     * Subject is the object being viewed that we're attaching to.
+     * args[id] is the id of the object.
+     * args[caller] the module who notified of this event.
+     *
+     * @param Zikula_Hook $hook
+     *
+     * @return void
+     */
+    public function ui_view(Zikula_DisplayHook $hook)
+    {
+       $modname = $hook->getCaller();
+       $textfieldname = $hook->getId();
+        
         if(empty($textfieldname)) {
            $textfieldname = 'textfield';
         }
@@ -50,7 +75,7 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
             'end'   => $e['url']['end'],
         );
             
-        if($editor_settings['italic']) {
+        if(array_key_exists('italic', $editor_settings) and $editor_settings['italic']) {
             $items[] = array(
                 'icon'     => 'italic.png',
                 'title'    => $this->__('Italic text'),
@@ -60,7 +85,7 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
                 'shortcut' => $this->__('i', 'test'),
             );
         }
-        if($editor_settings['bold']) {
+        if(array_key_exists('bold', $editor_settings) and $editor_settings['bold']) {
             $items[] = array(
                 'icon'     => 'bold.png',
                 'title'    => $this->__('Bold text'),
@@ -70,7 +95,7 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
                 'shortcut' => $this->__('b'),
             );
         }
-        if($editor_settings['underline']) {
+        if(array_key_exists('underline', $editor_settings) and  $editor_settings['underline']) {
             $items[] = array(
                 'icon'  => 'underline.png',
                 'title' => $this->__('Underline'),
@@ -80,7 +105,7 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
                 'shortcut' => $this->__('u', 'test'),
             );
         }
-        if($editor_settings['strikethrough']) {
+        if(array_key_exists('strikethrough', $editor_settings) and $editor_settings['strikethrough']) {
             $items[] = array(
                 'icon'  => 'strikethrough.png',
                 'title' => $this->__('Strike through'),
@@ -89,7 +114,7 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
                 'end'   => $e['strikethrough']['end'],
             );
         }
-        if($editor_settings['mark']) {
+        if(array_key_exists('mark', $editor_settings) and $editor_settings['mark']) {
             $items[] = array(
                 'icon'  => 'mark.png',
                 'title' => $this->__('Mark'),
@@ -98,7 +123,7 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
                 'end'   => $e['mark']['end'],
             );
         }
-        if($editor_settings['code']) {
+        if(array_key_exists('code', $editor_settings) and $editor_settings['code']) {
             $items[] = array(
                 'icon'  => 'code.png',
                 'title' => $this->__('Code'),
@@ -107,7 +132,7 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
                 'end'   => $e['code']['end'],
             );
         }
-        if($editor_settings['headings']) {
+        if(array_key_exists('headings', $editor_settings) and $editor_settings['headings']) {
             $headings = array(
                 'h1' => $e['h1']['begin'],
                 'h2' => $e['h2']['begin'],
@@ -119,23 +144,45 @@ class LuMicuLa_Api_Plugin extends Zikula_AbstractApi
             $headings = null;
         }
         
-        if($editor_settings['smilies']) {
+        if(array_key_exists('smilies', $editor_settings) and $editor_settings['smilies']) {
             $smilies = ModUtil::apiFunc($this->name, 'user', 'smilies');
         } else {
             $smilies = null;
         }
 
-        $renderer = Zikula_View::getInstance($this->name);
-        return $renderer->assign('textfieldname', $textfieldname)
-                        ->assign('smilies',       $smilies)
-                        ->assign('items',         $items)
-                        ->assign('headings',      $headings)
-                        ->assign('quote',         false)
-                        ->fetch('editor.tpl');
+        $this->view->assign('textfieldname', $textfieldname)
+                   ->assign('smilies',       $smilies)
+                   ->assign('items',         $items)
+                   ->assign('headings',      $headings)
+                   ->assign('quote',         false);
         
+        $response = new Zikula_Response_DisplayHook('provider_area.ui.lumicula.lml', $this->view, 'editor.tpl');
+        $hook->setResponse($response);
     }
-    
-    
-    
-    
+
+    /**
+     * Filter hook for view
+     *
+     * Subject is the object being viewed that we're attaching to.
+     * args[id] is the id of the object.
+     * args[caller] the module who notified of this event.
+     *
+     * @param Zikula_Hook $hook
+     *
+     * @return void
+     */
+    public function filter(Zikula_FilterHook $hook)
+    {
+        
+        $text = $hook->getData();
+        $text = ModUtil::apiFunc('LuMicuLa', 'user', 'transform', array(
+            'text'   => $text,
+            'modname' => $hook->getCaller())
+        );
+        
+        $hook->setData($text);
+    }
+
+
+
 }

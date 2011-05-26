@@ -30,7 +30,7 @@ class LuMicuLa_Model_LuMicuLa extends Doctrine_Record
         $this->hasColumn('language', 'string', 16, array(
             'default' => null
         ));
-        $this->hasColumn('elements', 'cblob', 65532, array(
+        $this->hasColumn('elements', 'array', array(
             'default' => null
         ));
 

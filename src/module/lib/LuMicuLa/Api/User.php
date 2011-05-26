@@ -338,9 +338,9 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
     
         $all_module_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->findAll();
         $all_module_settings = $all_module_settings->toArray();
-        
+                
         foreach($all_module_settings as $key => $value) {
-            $elements = unserialize($value['elements']);
+            $elements = $value['elements'];
             if(is_array($elements)) {
                 $all_module_settings[$key] = array_merge($value, $elements);                
             }
@@ -355,7 +355,7 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         $module_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->findOneBy('modname', $modname);
         if($module_settings) {
             $module_settings = $module_settings->toArray();
-            $elements = unserialize($module_settings['elements']);
+            $elements = $module_settings['elements'];
             unset($module_settings['elements']);
             if(is_array($elements)) {
                 $module_settings = array_merge($module_settings, $elements);
@@ -383,5 +383,10 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         }
         return $message;
     }
+    
+    
+    
+    
+    
     
 }

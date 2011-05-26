@@ -83,16 +83,24 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         $ok = $view->isValid();
         $data0 = $view->getValues();
 
-        $data['language'] = $data0['language'];
-        unset($data0['language']);
-        $data['elements'] = serialize($data0);
+
+
         
         // switch between edit and create mode
         if ($this->_modname) {
             $d = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->find($this->_modname);
         } else {
+            $data['modname'] = $data0['modname'];
+            unset($data0['modname']);
             $d = new LuMicuLa_Model_LuMicuLa();
         }
+        
+        $data['language'] = $data0['language'];
+        unset($data0['language']);
+        $data['elements'] = $data0;//serialize($data0);
+        
+        
+        
         $d->merge($data);
         $d->save();
 

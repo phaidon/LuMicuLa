@@ -1,6 +1,6 @@
+{ajaxheader modname='LuMicuLa' filename='smilies.js' ui=true}
 {pageaddvar name="javascript" value="modules/LuMicuLa/javascript/editor.js"}
 {pageaddvar name="stylesheet" value="modules/LuMicuLa/style/editor.css"}
-{ajaxheader modname='LuMicuLa' filename='smilies.js' ui=true}
 
 <div class="lumicula_editor_bar" id="lumicula_editor_bar">
 
