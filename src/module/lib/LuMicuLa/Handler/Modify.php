@@ -24,10 +24,13 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         if ($modname) {
             $view->assign('templatetitle', $this->__('Modify module settings').': '.$modname);
             $view->assign('create', false);
-            $module_settings = ModUtil::apiFunc($this->name, 'user', 'getModuleSettings', $modname);
+            $module_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')
+                              ->findOneBy('modname', $modname);
+            $module_settings = $module_settings->toArray();
             if ($module_settings) {
                 $this->_modname = $modname;
                 $view->assign($module_settings);
+                $view->assign($module_settings['elements']);
                 
             } else {
                 return LogUtil::registerError($this->__f('Article with id %s not found', $id));
@@ -63,6 +66,10 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
             array('value' => 'Wakka',  'text' => 'Wakka'),
         );
         $view->assign('lmls', $lmls);
+        
+        
+        $elements = ModUtil::apiFunc($this->name, 'user', 'elements');
+        $view->assign('elements', $elements);
 
         return true;
     }
@@ -97,9 +104,9 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         
         $data['language'] = $data0['language'];
         unset($data0['language']);
-        $data['elements'] = $data0;//serialize($data0);
-        
-        
+        $data['smilies'] = $data0['smilies'];
+        unset($data0['smilies']);
+        $data['elements'] = $data0;        
         
         $d->merge($data);
         $d->save();

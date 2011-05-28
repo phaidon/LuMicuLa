@@ -25,6 +25,11 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
     public function elements()
     {
         return array(
+            'code' => array(
+                'begin' => '{{{',
+                'end'   => '}}}',
+                'func'  => true,
+            ),
             'img' => array(
                 'begin' => '{{',
                 'inner' => 'http://www.example.com/image.png',
@@ -33,18 +38,22 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
             ),
             'youtube' => array(
                 'begin' => '<<youtube id=',
-                'inner' => '',
                 'end'   => '>>',
             ),
             'hr' => array(
                 'begin' => '----',
-                'inner' => '',
                 'end'   => '',
             ),
-            'url' => array(
+           'page' => array(
+                'begin' => '[[',
+                'inner' => $this->__('Page').'|'.$this->__('Page Title'),
+                'end'   => ']]',
+            ),
+            'link' => array(
                 'begin' => '[[',
                 'inner' => $this->__('http://www.example.com').'|'.$this->__('Url Title'),
                 'end'   => ']]',
+                'func'  => true,
             ),
             'bold' => array(
                 'begin' => '**',
@@ -66,66 +75,76 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
                 'begin' => '++',
                 'end'   => '++',
             ),
-            'code' => array(
-                'begin' => '{{{',
-                'end'   => '}}}',
+            'monospace' => array(
+                'begin' => "##",
+                'end'   => "##",
             ),
-            'h5' => array(
-                'begin' => '======= ',
-                'end'   => "\n",
+            'key' => array(
+                'begin' => "#%",
+                'end'   => "#%",
             ),
-            'h4' => array(
-                'begin' => '====== ',
-                'end'   => "\n",
-            ),
-            'h3' => array(
-                'begin' => '==== ',
-                'end'   => "\n",
-            ),
-            'h2' => array(
-                'begin' => '=== ',
-                'end'   => "\n",
-            ),
-            'h1' => array(
-                'begin' => '== ',
-                'end'   => "\n",
-            ),
+            'headings'  => array(
+                'subitems' => array(
+                    'h5' => array(
+                        'begin' => '======= ',
+                        'end'   => "\n",
+                    ),
+                    'h4' => array(
+                        'begin' => '====== ',
+                        'end'   => "\n",
+                    ),
+                    'h3' => array(
+                        'begin' => '==== ',
+                        'end'   => "\n",
+                    ),
+                    'h2' => array(
+                        'begin' => '=== ',
+                        'end'   => "\n",
+                    ),
+                    'h1' => array(
+                        'begin' => '== ',
+                        'end'   => "\n",
+                    )
+                )
+            )
+           
 
         );
     }
     
-    public function img($message)
-    {
-        $message = preg_replace_callback(
-            "#\{\{(.*?)\}\}#si",
-            Array($this, 'image_callback'),
-            $message
-        );
-        return $message;
-    }
-    
-    
         
-    protected function image_callback($matches)
+    public static function img_callback($matches)
     {
         $array = explode("|", $matches[1]);
         $image['src']   = $array[0];
         
         if(count($array) == 2) {
             $image['title'] = $array[1];
-        } else {
-            $image['title'] = null;
         }
-        
-        return ModUtil::apiFunc($this->name, 'user', 'transform_image', $image);
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_image', $image);
+    }
+    
+    public static function code_callback($matches)
+    {
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_code', $matches[1]);
+    }
+    
+    
+    public static function link_callback($matches)
+    {        
+        $array = explode("|", $matches[1]);
+        $link['url'] = $array[0];
+ 
+        if(count($array) > 1) {
+            $link['title'] = $array[1];
+        }
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
     }
     
     
     
-    private $_codeblocks;
-
     
-    public function preTransform($message)
+  /*  public function preTransform($message)
     {
               
         $message = preg_replace_callback(
@@ -140,30 +159,21 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
         );
         
         
+
+        
+        
         $message = preg_replace_callback(
-            "#\[\[(.*?)\]\]#si",
-            Array($this, 'linktest_callback'),
-            $message
-        );
-        
-        
-        
-        /*$message = preg_replace_callback(
             "#<<(.*?)>>#si",
             Array($this, 'function_callback'),
             $message
-        );*/
+        );
         
         
         return $message;
 
     }
     
-    
-    public function postTransform($message)
-    {
-        return str_replace('CREOLELINKREPLACEMENT', '//', $message);
-    }
+ 
     
      public function list_callback_0($matches) {
 
@@ -217,40 +227,7 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
     {
        return ModUtil::apiFunc('Wikula', 'action', $matches[1]);
     }
-    
-    
-    protected function linktest_callback($matches)
-    {
-        $array = explode("|", $matches[1]);
-        $url   = $array[0];
-        
-
-        if(count($array) == 2) {
-            $title = $array[1];
-        } else {
-            $title = $url;
-            $title = ModUtil::apiFunc($this->name, 'user', 'minimize_displayurl', $title);
-            $title = str_replace("//", "CREOLELINKREPLACEMENT", $title);
-        }
-        
-        $pos = strpos($url, '://');
-        if( $pos === false) {
-            $tag = $url;
-            $url = ModUtil::url('Wikula', 'user', 'main', array('tag' => $url) );
-            if( !ModUtil::apiFunc('Wikula', 'user', 'PageExists', array('tag'=>$tag)) ) {
-                $url   = str_replace("//", "CREOLELINKREPLACEMENT", $url);
-                return "$title<a href='$url'>?</a>";
-            }
-        }
-        
-        $url   = str_replace("//", "CREOLELINKREPLACEMENT", $url);
-        return "<a href='$url'>$title</a>";
-    }
-    
-    
-    public function code() {
-        return "\{\{\{(.*?)\}\}\}";
-    }
-    
+   
+    */
     
 }

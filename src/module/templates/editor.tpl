@@ -4,26 +4,37 @@
 
 <div class="lumicula_editor_bar" id="lumicula_editor_bar">
 
+
+
     {foreach from=$items item="item"}
-        {assign var='begin' value=$item.begin}
-        {assign var='inner' value=$item.inner}
-        {assign var='end'   value=$item.end}
-        {assign var='title' value=$item.title}
-        {gt assign='ctrl' text='ctrl'}
+        {if !array_key_exists('subitems', $item)}
+            {assign var='begin' value=$item.begin}
+            {assign var='inner' value=$item.inner}
+            {assign var='end'   value=$item.end}
+            {assign var='title' value=$item.title}
+            {gt assign='ctrl' text='ctrl'}
 
-        {if array_key_exists('shortcut', $item)}
-        {assign var='shortcut' value=$item.shortcut}
-        <script type="text/javascript">
-            new HotKey('{{$shortcut}}',function(event){
-                insertAtCursor({{$textfieldname}}, '{{$begin}}', '{{$inner}}', '{{$end}}');
-            }); 
-        </script>
-        {assign var='title' value="$title ($ctrl+$shortcut)"}
+            {if array_key_exists('shortcut', $item)}
+            {assign var='shortcut' value=$item.shortcut}
+            <script type="text/javascript">
+                new HotKey('{{$shortcut}}',function(event){
+                    insertAtCursor({{$textfieldname}}, '{{$begin}}', '{{$inner}}', '{{$end}}');
+                }); 
+            </script>
+            {assign var='title' value="$title ($ctrl+$shortcut)"}
+            {/if}
+
+
+            {img modname='LuMicuLa' src=$item.icon title=$title 
+            onclick="insertAtCursor('$textfieldname', '$begin', '$inner', '$end');return false"}
+        {else}
+            <select style="height:22px;vertical-align:middle;margin-top:-15px" onchange="insertAtCursor2({$textfieldname}, this.value);this.selectedIndex=0;return false">
+                <option value="0">{gt text='Heading'}</option>
+                {foreach from=$item.subitems item='subitem' key='key'}
+                <option value="{$subitem.begin},{$subitem.inner},{$subitem.end}">{$subitem.title}</option>
+                {/foreach}
+             </select>
         {/if}
-
-
-        {img modname='LuMicuLa' src=$item.icon title=$title 
-        onclick="insertAtCursor('$textfieldname', '$begin', '$inner', '$end');return false"}
 
     {/foreach}
 
@@ -38,23 +49,10 @@
     onclick="toggle_smileybox()"}
     {/if}
 
-
-
-    {if count($headings) > 0}
-    <select style="height:22px;vertical-align:middle;margin-top:-15px" onchange="insertAtCursor({$textfieldname}, this.value, '{gt text='Heading'}', '');this.selectedIndex=0;return false">
-        <option value="0">{gt text='Heading'}</option>
-        <option value="{$headings.h1}">{gt text='Heading'}: {gt text='Level'} 1</option>
-        <option value="{$headings.h2}">{gt text='Heading'}: {gt text='Level'} 2</option>
-        <option value="{$headings.h3}">{gt text='Heading'}: {gt text='Level'} 3</option>
-        <option value="{$headings.h4}">{gt text='Heading'}: {gt text='Level'} 4</option>
-        <option value="{$headings.h5}">{gt text='Heading'}: {gt text='Level'} 5</option>
-    </select>
-    {/if}
-
 </div>
 
 {if count($smilies) > 0}
-<div id="smileybox" class="lumicula_smiley_bar" style="display: none;">
+<div id="lumicula_smiley_bar" class="lumicula_smiley_bar" style="display: none;">
 {foreach from=$smilies item="icon" key="tag"}
     {img modname='LuMicuLa' src="smilies/$icon" title=$tag 
     onclick="insertAtCursor('$textfieldname', '$tag ', '', '');return false"}

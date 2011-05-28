@@ -7,12 +7,21 @@ function textarea_width_correction() {;
     $('lumicula_editor_bar').setStyle({
         width:ww + 'px'
     });
+    $('lumicula_smiley_bar').setStyle({
+        width:ww + 'px'
+    });
     $(textfieldname).addClassName('lumicula')
     $(textfieldname).setStyle({
         width:vv + 'px',
         padding:'5px'
     });
 
+}
+
+
+function insertAtCursor2(textfieldname, tag) {
+    var tags = tag.split(",");
+    insertAtCursor(textfieldname, tags[0], tags[1], tags[2]);
 }
 
 function insertAtCursor(textfieldname, startTag, middleTag, endTag) {

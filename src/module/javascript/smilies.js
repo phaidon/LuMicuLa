@@ -1,3 +1,3 @@
 function toggle_smileybox() {
-    $('smileybox').toggle();
+    $('lumicula_smiley_bar').toggle();
 }

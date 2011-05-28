@@ -23,7 +23,30 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
         
     public function elements()
     {
+         
         return array(
+            'code' => array(
+                'begin' => '[code]',
+                'end'   => '[/code]',
+                'func'  => true,
+            ),
+            'img' => array(
+                'begin' => '[img]',
+                'inner' => 'http://www.example.com/image.png',
+                'end'   => '[/img]',
+                'func'  => true
+            ),
+           'page' => array(
+                'begin' => '[url]',
+                'inner' => $this->__('Page'),
+                'end'   => '[/url]',
+            ),
+            'link' => array(
+                'begin' => '[url]',
+                'inner' => $this->__('http://www.example.com'),
+                'end'   => '[/url]',
+                'func'  => true
+            ),
             'bold' => array(
                 'begin' => '[b]',
                 'end'   => '[/b]',
@@ -40,13 +63,17 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
                 'begin' => '[s]',
                 'end'   => '[/s]',
             ),
+            'hr' => array(
+                'begin' => '[hr]',
+                'inner' => '',
+                'end'   => '',
+            ),
             'mark' => array(
                 'begin' => '[mark]',
                 'end'   => '[/mark]',
             ),
             'youtube' => array(
                 'begin' => '[youtube]',
-                'inner' => '',
                 'end'   => '[/youtube]',
             ),
             'h5' => array(
@@ -69,20 +96,42 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
                 'begin' => '[h1]',
                 'end'   => '[/h1]',
             ),
-            'url' => array(
-                'begin' => '[url]',
-                'inner' => $this->__('http://www.example.com'),
-                'end'   => '[/url]',
+            'monospace' => array(
+                'begin' => '[monospace]',
+                'end'   => '[/monospace]',
             ),
-            'code' => array(
-                'begin' => '[code]',
-                'inner' => $this->__('Code'),
-                'end'   => '[/code]',
+            'key' => array(
+                'begin' => "[key]",
+                'end'   => "[/key]",
             ),
         );
     }
     
-    public function code() {
-        return "\[code\](.*?)\[\/code\]";
+        
+    public static function img_callback($matches)
+    {
+        $array = explode("|", $matches[1]);
+        $image['src']   = $array[0];
+        
+        if(count($array) == 2) {
+            $image['title'] = $array[1];
+        }
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_image', $image);
     }
+    
+    public static function code_callback($matches)
+    {
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_code', $matches[1]);
+    }
+    
+    
+    
+    public static function link_callback($matches)
+    {        
+        $link['url'] =  $matches[1];
+
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
+    }
+    
+    
 }

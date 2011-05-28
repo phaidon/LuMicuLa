@@ -27,29 +27,19 @@
 <fieldset>
     <legend>Elements</legend><br />
     <table cellpadding=5><tr>
-        <td>{img modname='LuMicuLa' src='bold.png' __title='Bold text'}</td>
-        <td>{formcheckbox id='bold'}</td>
+        {foreach from=$elements item='element' key='key'}
+        <td>{img modname='LuMicuLa' src=$element.icon' title=$element.title}</td>
+        <td>{formcheckbox id="$key"}</td>
+        {/foreach}
 
-        <td>{img modname='LuMicuLa' src='italic.png' __title='Italic'}</td>
-        <td>{formcheckbox id='italic'}</td>
-
-        <td>{img modname='LuMicuLa' src='underline.png' __title='Underline'}</td>
-        <td>{formcheckbox id='underline'}</td>
-
-        <td>{img modname='LuMicuLa' src='strikethrough.png' __title='Strikethrough'}</td>
-        <td>{formcheckbox id='strikethrough'}</td>
-
-        <td>{img modname='LuMicuLa' src='mark.png' __title='Mark'}</td>
-        <td>{formcheckbox id='mark'}</td>
-
-        <td>{img modname='LuMicuLa' src='code.png' __title='Code'}</td>
-        <td>{formcheckbox id='code'}</td>
 
         <td>{img modname='LuMicuLa' src='smiley.png' __title='Smilies'}</td>
         <td>{formcheckbox id='smilies'}</td>
 
         <td>{img modname='LuMicuLa' src='headings.png' __title='Headings'}</td>
         <td>{formcheckbox id='headings'}</td>
+
+  
 
     </tr></table>
 
