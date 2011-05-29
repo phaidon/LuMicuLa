@@ -1,4 +1,4 @@
-{pageaddvar name='javascript' value='javascript/helpers/Zikula.UI.js'}
+{pageaddvar name="stylesheet" value="modules/LuMicuLa/style/transform.css"}
 {include file="admin/header.tpl"}
 <div class="z-adminpageicon">{icon type="view" size="large"}</div>
 <h2>{gt text='Supported tags'}</h2>

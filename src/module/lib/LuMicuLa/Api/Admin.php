@@ -22,15 +22,20 @@ class LuMicuLa_Api_Admin extends Zikula_AbstractApi
     public function getlinks($args)
     {
         $links = array();
-        if( SecurityUtil::checkPermission('LuMicuLa_Api::', '::', ACCESS_ADMIN) ) {
+        if( SecurityUtil::checkPermission('LuMicuLa::', '::', ACCESS_ADMIN) ) {
             $links[] = array(
                 'url'   => ModUtil::url($this->name, 'admin', 'modules'),
-                'text'  => 'Module preferences',
+                'text'  => $this->__('Module preferences'),
                 'class' => 'z-icon-es-view'
              );
             $links[] = array(
+                'url'   => ModUtil::url($this->name, 'admin', 'tags'),
+                'text'  => $this->__('Supported tags'),
+                'class' => 'z-icon-es-help'
+            );
+            $links[] = array(
                 'url'   => ModUtil::url($this->name, 'admin', 'modifyconfig'),
-                'text'  => 'Settings',
+                'text'  => $this->__('Settings'),
                 'class' => 'z-icon-es-config'
             );
         }

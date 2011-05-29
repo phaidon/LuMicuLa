@@ -34,7 +34,7 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
                 'begin' => '[img]',
                 'inner' => 'http://www.example.com/image.png',
                 'end'   => '[/img]',
-                'func'  => true
+                'func'  => true,
             ),
            'page' => array(
                 'begin' => '[url]',
@@ -46,6 +46,11 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
                 'inner' => $this->__('http://www.example.com'),
                 'end'   => '[/url]',
                 'func'  => true
+            ),
+            'list' => array(
+                'begin' => '[list] [*]',
+                'end'   => '[/list]',
+                'func'  => '[list]VALUE[/list]',
             ),
             'bold' => array(
                 'begin' => '[b]',
@@ -72,30 +77,59 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
                 'begin' => '[mark]',
                 'end'   => '[/mark]',
             ),
+            'center' => array(
+                'begin' => '[center]',
+                'end'   => '[/center]',
+            ),
+            'size' => array(
+                'begin' => '[size=VALUE]',
+                'end'   => '[/size]',
+            ),
+            'table' => array(
+                'begin' => '[table][tr][td]',
+                'end'   => '[/td][/tr][/table]',
+                'func'  => '[table]VALUE[/table]'
+            ),
+            'color' => array(
+                'begin' => '[color=VALUE]',
+                'end'   => '[/color]',
+            ),
             'youtube' => array(
                 'begin' => '[youtube]',
                 'end'   => '[/youtube]',
             ),
-            'h5' => array(
-                'begin' => '[h5] ',
-                'end'   => '[/h5]',
+           'subscript'   => array(
+                'begin'      => '[sub]',
+                'end'        =>  '[/sub]',
             ),
-            'h4' => array(
-                'begin' => '[h4]',
-                'end'   => '[/h4]',
+            'superscript'=> array(
+                'begin'      => '[sup]',
+                'end'        =>  '[/sup]',
             ),
-            'h3' => array(
-                'begin' => '[h3]',
-                'end'   => '[/h3]',
-            ),
-            'h2' => array(
-                'begin' => '[h2]',
-                'end'   => '[/h2]',
-            ),
-            'h1' => array(
-                'begin' => '[h1]',
-                'end'   => '[/h1]',
-            ),
+            'headings'  => array(
+                'subitems' => array(
+                    'h5' => array(
+                        'begin' => '[h5] ',
+                        'end'   => '[/h5]',
+                    ),
+                    'h4' => array(
+                        'begin' => '[h4]',
+                        'end'   => '[/h4]',
+                    ),
+                    'h3' => array(
+                        'begin' => '[h3]',
+                        'end'   => '[/h3]',
+                    ),
+                    'h2' => array(
+                        'begin' => '[h2]',
+                        'end'   => '[/h2]',
+                    ),
+                    'h1' => array(
+                        'begin' => '[h1]',
+                        'end'   => '[/h1]',
+                    ),
+                 ),
+             ),
             'monospace' => array(
                 'begin' => '[monospace]',
                 'end'   => '[/monospace]',
@@ -119,19 +153,46 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
         return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_image', $image);
     }
     
+    
     public static function code_callback($matches)
     {
         return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_code', $matches[1]);
     }
     
     
-    
     public static function link_callback($matches)
     {        
         $link['url'] =  $matches[1];
-
         return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
     }
     
+    public static function table_callback($matches)
+    {        
+        $table = str_replace("\n",    '',      $matches[1]);
+        $table = str_replace('<br>',  '',      $table);
+        $table = str_replace('[tr]',  '<tr>',  $table);
+        $table = str_replace('[/tr]', '</tr>', $table);
+        $table = str_replace('[td]',  '<td>',  $table);
+        $table = str_replace('[/td]', '<td>',  $table);
+        return '<table>'.$table.'</table>';
+    }
+    
+    
+    public static function list_callback($matches)
+    {   
+        $list = str_replace("\n", '', $matches[1]);
+        $list = str_replace('<br>', '', $list);
+        $list = explode("[*]", $list);
+        
+        $result = '';
+        foreach($list as $li) {
+            if($li != ' ' and !empty($li)) {
+               $result .= '<li>'.$li.'</li>';
+            }
+        }
+        return '<ul>'.$result.'</ul>';
+    }
+   
+
     
 }

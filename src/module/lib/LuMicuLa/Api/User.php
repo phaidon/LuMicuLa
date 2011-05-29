@@ -36,6 +36,11 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 'icon'         => 'link.png',
                 'title'        => $this->__('Web link'),
             ),
+            'list'            => array(
+                'icon'         => 'list.png',
+                'title'        => $this->__('List'),
+                'inner'        => $this->__('list item'),
+            ),
             'img'           => array(
                 'icon'         => 'img.png',
                 'title'        => $this->__('Image'),
@@ -85,11 +90,47 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 'title'        => $this->__('Monospace'),
                 'inner'        => $this->__('Monospace'),
             ),
+            'center'           => array(
+                'icon'         => 'center.png',
+                'title'        => $this->__('centered text'),
+                'inner'        => $this->__('centered text'),
+            ),
+            'size'          => array(
+                'icon'         => 'size.png',
+                'title'        => $this->__('Font size'),
+                'inner'        => $this->__('Large text'),
+                'values'       => array(
+                    0 => '12pt'
+                )
+            ),
+            'color'         => array(
+                'icon'         => 'color.png',
+                'title'        => $this->__('Font color'),
+                'inner'        => $this->__('colored text'),
+                'values'       => array(
+                    0 => 'red'
+                )
+            ),
+           'table'           => array(
+                'icon'         => 'table.png',
+                'title'        => $this->__('Table'),
+                'inner'        => $this->__('table data'),
+            ),
             'key'           => array(
                 'icon'         => 'key.png',
                 'title'        => $this->__('Key'),
                 'inner'        => $this->__('CTR-C'),
             ),
+           'subscript'   => array(
+                'icon'         => 'subscript.png',
+                'title'        => $this->__('subscripted text'),
+                'inner'        => $this->__('subscripted text'),
+            ),
+            'superscript'   => array(
+                'icon'         => 'superscript.png',
+                'title'        => $this->__('superscripted text'),
+                'inner'        => $this->__('superscripted text'),
+            ),  
             'headings'      => array(
                 'icon'         => 'headings.png',
                 'title'        => $this->__('Headings'),
@@ -152,6 +193,61 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         }
         
         return $elements;
+    }
+    
+    
+   public function supportedTags()
+   {    
+        $replaces = ModUtil::apiFunc($this->name, 'transform', 'replaces');
+        $tags     = ModUtil::apiFunc($this->name, 'user',      'elements');
+        foreach($tags as $key => $value) {
+
+           $lmls = array('BBCode', 'Creole', 'Wakka');
+            
+           foreach($lmls as $lml) {
+               $lmlElements = ModUtil::apiFunc($this->name, $lml, 'elements'); 
+               if(array_key_exists($key, $lmlElements)) {
+                   if(array_key_exists('func', $lmlElements[$key]) and $lmlElements[$key]['func']) {
+                      $tags[$key]['lmls'][$lml] = '<i>'.$this->__('Function').'</i>';
+                   } else if(array_key_exists('subitems', $lmlElements[$key])) {
+                      $tags[$key]['lmls'][$lml] = '<i>'.$this->__('Super tag').'</i>';
+                   } else {
+                       $inner = '';
+                       if(array_key_exists('inner', $lmlElements[$key])) {
+                           $inner = $lmlElements[$key]['inner'];
+                       } else if (array_key_exists('inner', $value)) {
+                           $inner = $value['inner'];
+                       }
+                       $lmltag = '';
+                       if(array_key_exists('begin', $lmlElements[$key])) {
+                           $lmltag = htmlentities($lmlElements[$key]['begin'].$inner.$lmlElements[$key]['end']);
+                           $lmltag = str_replace('&quot;', '"', $lmltag);
+                       }
+                       $tags[$key]['lmls'][$lml] = $lmltag;
+                   }
+               } else {
+                   $tags[$key]['lmls'][$lml] = '<i>'.$this->__('Not available').'</i>';
+               }
+           }
+           
+            $html = '';
+            if(array_key_exists($key, $replaces) and array_key_exists('begin', $replaces[$key]) ) {
+                if (array_key_exists('inner', $value)) {
+                   $inner = $value['inner'];
+                } else {
+                   $inner = '';
+                }
+                $html = $replaces[$key]['begin'].$inner.$replaces[$key]['end'];
+            }
+            $tags[$key]['html'] = htmlentities($html);
+            if(array_key_exists('preview', $value) and !$value['preview']) {
+                $tags[$key]['preview'] = '';
+            } else {
+                $tags[$key]['preview'] = $html;
+            }
+
+        }
+        return $tags;
     }
     
 }

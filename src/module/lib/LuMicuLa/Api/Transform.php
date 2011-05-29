@@ -22,6 +22,10 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'begin'     => '<code>',
                 'end'       => '</code>',
             ),
+            'list' => array(
+                'begin'     => '<li>',
+                'end'       => '</li>',
+            ),
             'link' => array(
                 'begin'     => '<a>',
                 'end'       => '</a>',
@@ -58,34 +62,56 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'begin' => '<tt>',
                 'end'   => '</tt>',
             ),
+           'center' => array(
+                'begin' => '<center>',
+                'end'   => '</center>',
+            ),
+            'size'  => array(
+                'begin' => '<span style="font-size:VALUE">',
+                'end'   => '</span>',
+             ),
+            'color'  => array(
+                'begin' => '<span style="color:VALUE">',
+                'end'   => '</span>',
+             ),
+            'table' => array(
+                'begin' => '<table><tr><td>',
+                'end'   => '</td></tr></table>',
+            ),            
             'key' => array(
                 'begin' => '<kbd class="keys">',
                 'end'   => '</kbd>',
             ),
-            'headings' => array(
-                'subitems' => array(
-                    'h5' => array(
-                        'begin' => '<h6>',
-                        'end'   => '</h6>',
-                    ),
-                    'h4' => array(
-                        'begin' => '<h5>',
-                        'end'   => '</h5>',
-                    ),
-                    'h3' => array(
-                        'begin' => '<h4>',
-                        'end'   => '</h4>',
-                    ),
-                    'h2' => array(
-                        'begin' => '<h3>',
-                        'end'   => '</h3>',
-                    ),
-                    'h1' => array(
-                        'begin' => '<h2>',
-                        'end'   => '</h2>',
-                    ),
-                )
+           'subscript'   => array(
+                'begin'      => '<sub>',
+                'end'        =>  '</sub>',
             ),
+            'superscript'=> array(
+                'begin'      => '<sup>',
+                'end'        =>  '</sup>',
+            ),
+            'headings' => array(
+                'h5' => array(
+                    'begin' => '<h6>',
+                    'end'   => '</h6>',
+                ),
+                'h4' => array(
+                    'begin' => '<h5>',
+                    'end'   => '</h5>',
+                ),
+                'h3' => array(
+                    'begin' => '<h4>',
+                    'end'   => '</h4>',
+                ),
+                'h2' => array(
+                    'begin' => '<h3>',
+                    'end'   => '</h3>',
+                ),
+                'h1' => array(
+                    'begin' => '<h2>',
+                    'end'   => '</h2>',
+                ),
+             ),
             'youtube' => array(
                 'begin' => '<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/',
                 'end'   => '" frameborder="0">'
@@ -112,18 +138,52 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         $this->_codeblocks = array();
         
         extract($args);
-        if(empty($modname)) {
+        if(empty($modname) or empty($text)) {
             return $text;
         }
         PageUtil::addVar('stylesheet', "modules/LuMicuLa/style/transform.css");
 
         
+        $message = ' ' . $text; // pad it with a space so we can distinguish 
+        // between FALSE and matching the 1st char (index 0).
+        // This is important; bbencode_quote(), bbencode_list(), and 
+        // bbencode_code() all depend on it.
+         unset($text);
         
-        $message = $text;
-        unset($text);
+        
+        $message = $this->transform_quotes($message);
+    
+        
+        $message = $this->replace($message, $modname);
+            
+                
+        
+        $message = $this->transform_smilies($message);
+
+
+      
+        // Remove our padding from the string..
+        $message = substr($message, 1);       
         
         
-        // get the light markup language of the current module
+        $message = str_replace('<br>', '<br />', $message);
+        $message = str_replace("<br />\n", "\n", $message);
+        $message = str_replace("\n", "<br />\n", $message);
+        $message = str_replace("LINKREPLACEMENT", "//", $message);
+        
+        $message = $this->transform_code_post($message);
+        $message = $this->imageViewer($message);      
+        
+
+        return $message;
+
+    }
+    
+    
+    
+    protected function replace($message, $modname)
+    {
+       // get the light markup language of the current module
         if(!is_array($this->_lml) or !array_key_exists($modname, $this->_lml)) {
             $editor_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->find($modname);
             if(!$editor_settings) {
@@ -137,92 +197,127 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 
         $lml = $editor_settings['language'];
         
-        $message = ' ' . $message; // pad it with a space so we can distinguish 
-        // between FALSE and matching the 1st char (index 0).
-        // This is important; bbencode_quote(), bbencode_list(), and 
-        // bbencode_code() all depend on it.
-        
-        
-        $message                   = $this->transform_quotes($message);
-             
-        // transform other elements (bold, italic, , ...)
-        $elements = ModUtil::apiFunc($this->name, 'user', 'elements', $editor_settings);        
-                
         
         $replaces = $this->replaces();
-        foreach($elements as $key => $e) {
-            if(array_key_exists($key, $replaces)) {
-                if(array_key_exists('func', $e) and $e['func']) {
-                    $message = $this->transform_func($message, $key, $e, $lml);
+        // transform other elements (bold, italic, , ...)
+        $elements = ModUtil::apiFunc($this->name, 'user', 'elements', $editor_settings);
+        
+        
+        $message = $this->replace2($message, $elements, $replaces, $lml);
+        
+        return $message;
+        
+    }
+    
+    
+    protected function replace2($message, $elements, $replaces, $lml)
+    {
+        foreach($replaces as $tagID => $replaceData) {
+            if(!array_key_exists($tagID, $elements)) {
+                continue;
+            }
+            
+            $tagData = $elements[$tagID];
 
-                } else if (array_key_exists('subitems', $e) ) {
-                    foreach($e['subitems'] as $key2 => $f) {
-                        $replace = $replaces[$key]['subitems'][$key2];
-                        $message = $this->replace($message, $f, $replace);
-                    }
-                } else {
-                    $replace = $replaces[$key];
-                    $message = $this->replace($message, $e, $replace);
+            $func = null; $subitems = null;
+            extract($tagData);// begin, end, func
 
+            
+            if(!is_null($func) and $func) {
+                $message = $this->transform_func($message, $tagID, $tagData, $lml);  
+            } else if (!is_null($subitems) ) {
+                foreach($subitems as $key => $value) {
+                    $message = $this->replace2($message, $subitems, $replaceData, $lml);
                 }
+            } else {
+                if(substr_count($begin, 'VALUE') > 0) {
+                    $message = $this->transform_multi($message,$tagID, $tagData, $replaceData);
+                }
+                
+                $begin = preg_quote($begin,'/');
+                $begin = str_replace("BOL", "^", $begin);
+                $end   = preg_quote($end,  '/');
+                $message = preg_replace(
+                    "/".$begin."(.*?)".$end."/si",
+                    $replaceData['begin']."\\1".$replaceData['end'],
+                    $message
+                );
             }
         }
-                
-        
-        $message = $this->transform_smilies($message);
-
-
-      
-        // Remove our padding from the string..
-        $message = substr($message, 1);        
-        $message = str_replace("<br />\n", "\n", $message);
-        $message = str_replace("\n", "<br />\n", $message);
-        
-        $message = str_replace("LINKREPLACEMENT", "//", $message);
-        
-        
-        
-        
-        
-        $message = $this->transform_code_post($message);
-        $message = $this->imageViewer($message);      
-        
-       
-        
         return $message;
-
     }
-    
-    protected function replace($message, $e, $r ) {
-
-        $e['begin'] = preg_quote($e['begin'],'/');
-        $e['begin'] = str_replace("BOL", "^", $e['begin']);
-        $e['end']   = preg_quote($e['end'],  '/');
-        return preg_replace(
-            "/".$e['begin']."(.*?)".$e['end']."/si",
-            $r['begin']."\\1".$r['end'],
-            $message
-        );
-        
-    }
-    
-    
     
     protected function transform_func($message, $tag, $tagData, $lml)
-    {
+    {        
         extract($tagData);
-        $begin = preg_quote($begin,'/');
-        $end   = preg_quote($end,'/');
-        
+        $pattern = 'si';
+        if(!empty($regexp) and $regexp) {
+            $pattern .= 'm';
+        } else {
+            $begin = preg_quote($begin,'/');
+            $end   = preg_quote($end,'/');
+        }
+        if($func == 1) {
+             $expression = "#".$begin."(.*?)".$end."#".$pattern;
+        } else {
+            $func = preg_quote($func,'/');
+            $func = str_replace('VALUE', "(.*?)", $func);
+            $expression = "#".$func."#".$pattern;
+        }
+
         $message = preg_replace_callback(
-            "#".$begin."(.*?)".$end."#si",
-            Array('LuMicuLa_Api_'.$lml, $tag.'_callback'),
+            $expression,
+            array('LuMicuLa_Api_'.$lml, $tag.'_callback'),
             $message
         );
+        
+        return $message;
+    }
+    
+    private $_current_replace;
+
+    protected function transform_multi($message, $tag, $tagData, $replace)
+    {    
+        
+        $replace = $replace['begin'].'VALUE'.$replace['end'];
+        
+        extract($tagData);
+        $pattern = 'si';
+        if(!empty($regexp) and $regexp) {
+            $pattern .= 'm';
+        } else {
+            $begin = preg_quote($begin,'/');
+            $end   = preg_quote($end,'/');
+        }  
+        
+        $expression = "#".$begin."(.*?)".$end."#".$pattern;
+        $expression = str_replace('VALUE', '(.*?)', $expression);
+        $this->_current_replace = $replace;  
+        
+        
+        $message = preg_replace_callback(
+            $expression,
+            array($this, 'multiparameter_callback'),
+            $message
+        );
+
         return $message;
     }
     
     
+    protected function multiparameter_callback($matches)
+    {        
+
+        unset($matches[0]);
+        $replace = $this->_current_replace;
+
+        foreach($matches as $match) {
+            $replace = preg_replace('/VALUE/', $match, $replace, 1);
+        }
+        
+   
+        return $replace;
+    } 
     
     public function transform_code($code)
     {
@@ -320,12 +415,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     
     
     
-        
-        
-    
-    
-    
-    
+
     
     
 

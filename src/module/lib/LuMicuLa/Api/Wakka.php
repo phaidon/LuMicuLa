@@ -45,6 +45,13 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
                 'end'   => ']]',
                 'func'  => true,
             ),
+            'list' => array(
+                'begin' => '^  \* ',
+                'end'   => '\n$',
+                'inner' => '',
+                'func'  => true,
+                'regexp'=> true // preg_quote
+            ),
             'hr' => array(
                 'begin' => '----',
                 'inner' => '',
@@ -77,6 +84,14 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
             'key' => array(
                 'begin' => "#%",
                 'end'   => "#%",
+            ),
+           'subscript'   => array(
+                'begin'      => ',,',
+                'end'        =>  ',,',
+            ),
+            'superscript'=> array(
+                'begin'      => '^^',
+                'end'        =>  '^^',
             ),
             'headings'  => array(
                 'subitems' => array(
@@ -141,6 +156,36 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
         return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
     }
     
+    public static function list_callback($matches)
+    {    
+        
+        $prevLevel = 0;
+        $result = '';
+        $array0 = explode("\n", '  * '.$matches[1]);
+        
+        foreach($array0 as $value) {
+            $array1 = explode("*", $value);
+            $level  = strlen($array1[0])/2;
+            $value  = substr($array1[1], 1); 
+            if($level > $prevLevel) {
+                $result .= '<ul>';
+            } else if ($level < $prevLevel) {
+                $result .= '</ul>';
+            }
+            $result .= '<li>'.$value.'</li>';
+            $prevLevel = $level; 
+
+        }
+        $result = str_replace('</li><ul>', '<ul>', $result);
+        $result = str_replace('</ul><li>', '</ul></li><li>', $result);  
+        $array = array();
+        for ($i = 1; $i <= $level; $i++) {
+            $array[$i] = '</ul>'; 
+        }
+        $result .= implode('</li>',$array);
+        return $result;
+    }
+     
     
     
 }

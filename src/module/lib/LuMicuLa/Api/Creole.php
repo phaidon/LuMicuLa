@@ -44,6 +44,13 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
                 'begin' => '----',
                 'end'   => '',
             ),
+            'list' => array(
+                'begin' => '^\* ',
+                'end'   => '\n$',
+                'inner' => '',
+                'func'  => true,
+                'regexp'=> true // preg_quote
+            ),
            'page' => array(
                 'begin' => '[[',
                 'inner' => $this->__('Page').'|'.$this->__('Page Title'),
@@ -83,6 +90,14 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
                 'begin' => "#%",
                 'end'   => "#%",
             ),
+           'subscript'   => array(
+                'begin'      => ',,',
+                'end'        =>  ',,',
+            ),
+            'superscript'=> array(
+                'begin'      => '^^',
+                'end'        =>  '^^',
+            ),
             'headings'  => array(
                 'subitems' => array(
                     'h5' => array(
@@ -112,7 +127,10 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
         );
     }
     
-        
+
+    
+    
+    
     public static function img_callback($matches)
     {
         $array = explode("|", $matches[1]);
@@ -130,6 +148,36 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
     }
     
     
+    public static function list_callback($matches)
+    {        
+        $prevLevel = 0;
+        $result = '';
+        $array0 = explode("\n", '* '.$matches[1]);
+        foreach($array0 as $value) {
+            $array1 = explode(" ", $value);
+            $level  = strlen($array1[0]);
+            unset($array1[0]);
+            $value  = implode(' ', $array1);
+            if($level > $prevLevel) {
+                $result .= '<ul>';
+            } else if ($level < $prevLevel) {
+                $result .= '</ul>';
+            }
+            $result .= '<li>'.$value.'</li>';
+            $prevLevel = $level; 
+
+        }
+        $result = str_replace('</li><ul>', '<ul>', $result);
+        $result = str_replace('</ul><li>', '</ul></li><li>', $result);  
+        $array = array();
+        for ($i = 1; $i <= $level; $i++) {
+            $array[$i] = '</ul>'; 
+        }
+        $result .= implode('</li>',$array);
+        return $result;
+    }
+    
+    
     public static function link_callback($matches)
     {        
         $array = explode("|", $matches[1]);
@@ -140,94 +188,5 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
         }
         return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
     }
-    
-    
-    
-    
-  /*  public function preTransform($message)
-    {
-              
-        $message = preg_replace_callback(
-            '/^((\*|#)+) *(.*?)$/ms',
-            Array($this, 'list_callback_0'),
-            $message
-        );
-        $message = preg_replace_callback(
-            "#\n\nli(.*?)>\n\n#si",
-            Array($this, 'list_callback_1'),
-            $message
-        );
-        
-        
-
-        
-        
-        $message = preg_replace_callback(
-            "#<<(.*?)>>#si",
-            Array($this, 'function_callback'),
-            $message
-        );
-        
-        
-        return $message;
-
-    }
-    
- 
-    
-     public function list_callback_0($matches) {
-
-        if(strlen($matches[1]) == 2) {
-            $countDoubleStars = substr_count($matches[0], '**');
-            $even = ($countDoubleStars & 1) ? false : true; // false = even, true = odd
-            if( $even and $countDoubleStars > 0) {
-                return $matches[0];
-            }
-        }
-
-        if($matches[2] == "#") {
-            $listtype = 'ol';
-        } else {
-            $listtype = 'ul';
-        }
-        $level = strlen($matches[1]);
-        return "li>".$level.">".$matches[3].">";
-    }
-        
-    public function list_callback_1($matches) {
-        $formatedList = '';
-        $list = explode("\n", $matches[0]);
-        $lastlevel = 0;
-        foreach($list as $l) {
-            if(empty($l)) {
-                continue;
-            }
-            $li = explode(">", $l);
-            $level = $li[1];
-            if( $level > $lastlevel ) {
-                $formatedList .= '<ul>';
-            } else if ( $level == $lastlevel ) {
-                $formatedList .= '</li>';
-            } else {
-                $formatedList .= '</li></ul></li>';
-            }
-            $formatedList .= '<li>';
-            $formatedList .= $li[2];
-            $lastlevel = $level;
-        }
-        while($lastlevel > 0) {
-            $formatedList .= '</li></ul>';
-            $lastlevel = $lastlevel -1;
-        }
-        return $formatedList;
-    }
-    
-    
-    protected function function_callback($matches)
-    {
-       return ModUtil::apiFunc('Wikula', 'action', $matches[1]);
-    }
-   
-    */
     
 }
