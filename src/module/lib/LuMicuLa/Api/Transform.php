@@ -376,8 +376,6 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     }    
     
 
-    
-    
     protected function transform_smilies($message)
     {   
         $alternative_smilies = ModUtil::apiFunc($this->name, 'Smilies', 'alternative_smilies');
@@ -421,39 +419,74 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     public function transform_link($link)
     {    
         extract($link);
+        if(empty($title)) {
+            $title = null;
+        }
+        
+        $mailto = substr($url, 0, 6) == 'mailto';
         
         $pos = strpos($url, '://');
-        if( $pos === false) {
-            $tag = $url;
-            if(empty($title)) {
-                $title = $tag;
-            }
-            $url = ModUtil::url('Wikula', 'user', 'main', array('tag' => $url) );
-            if( !ModUtil::apiFunc('Wikula', 'user', 'PageExists', array('tag'=>$tag)) ) {
-                $url   = str_replace("//", "LINKREPLACEMENT", $url);
-                return "$tag<a href='$url'>?</a>";
-            }
-            return "<a href='$url'>$title</a>"; 
+        if( $pos === false and !$mailto) {
+            return $this->transform_page($url, $title);
         }
         
         $url = str_replace("//", "LINKREPLACEMENT", $url);
-        if(empty($title) ) {
-            $title = $url;
-            $title = ModUtil::apiFunc($this->name, 'transform', 'minimize_displayurl', $title);
+        if(is_null($title) ) {
+            if($mailto) {
+                $title = substr($url, 7);
+            } else {
+                $title = $url;
+                $title = ModUtil::apiFunc($this->name, 'transform', 'minimize_displayurl', $title);
+            }
         }
         
         return "<a href='$url'>$title</a>";      
         
-    }    
-    
-    
-    
-    
-    
+    }
 
-    
-    
+    protected function transform_page($url, $title)
+    {
+        if(is_null($title)) {
+            $title = $url;
+        }
+        
+        $pos = strpos($url, ':');
+        if($pos === false) {
+            $url = 'wiki:'.$url;
+        }
 
+        list($goto, $id) = explode(':', $url);
+        switch ($goto) {
+        case 'post':
+            $url = ModUtil::url('Dizkus', 'user', 'viewtopic', array(
+                'topic' => $id
+            ));
+            break;
+        case 'topic':
+            $url = ModUtil::url('Dizkus', 'user', 'viewforum', array(
+                'forum' => $id
+            ));
+            break;
+        case 'task':
+            $url = ModUtil::url('Tasks', 'user', 'view', array(
+                'id' => $id
+            ));
+            break;
+         case 'wiki':
+            $tag = $id;
+            if(empty($title)) {
+                $title = $tag;
+            }
+            $url = ModUtil::url('Wikula', 'user', 'main', array('tag' => $tag) );
+            if( !ModUtil::apiFunc('Wikula', 'user', 'PageExists', array('tag'=>$tag)) ) {
+                $url   = str_replace("//", "LINKREPLACEMENT", $url);
+                return "$tag<a href='$url'>?</a>";
+            }
+            break;
+        }
+
+        return "<a href='$url'>$title</a>"; 
+    }
     
     protected function quote_callback($matches)
     {      
