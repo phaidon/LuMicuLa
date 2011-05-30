@@ -22,6 +22,10 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'begin'     => '<code>',
                 'end'       => '</code>',
             ),
+            'nomarkup' => array(
+                'begin'     => '<tt>',
+                'end'       => '</tt>',
+            ),
             'list' => array(
                 'begin'     => '<li>',
                 'end'       => '</li>',
@@ -58,6 +62,10 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'begin' => '<strong style="background-color:#ffee33;">',
                 'end'   => '</strong>',
             ),
+            'table' => array(
+                'begin' => '<table><tr><td>',
+                'end'   => '</td></tr></table>',
+            ),
             'monospace' => array(
                 'begin' => '<tt>',
                 'end'   => '</tt>',
@@ -73,14 +81,22 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             'color'  => array(
                 'begin' => '<span style="color:VALUE">',
                 'end'   => '</span>',
-             ),
-            'table' => array(
-                'begin' => '<table><tr><td>',
-                'end'   => '</td></tr></table>',
-            ),            
+             ),            
             'key' => array(
                 'begin' => '<kbd class="keys">',
                 'end'   => '</kbd>',
+            ),
+            'box' => array(
+                'begin' => '<div class="floatl">',
+                'end'   => '</div>',
+            ),
+            'clear' => array(
+                'begin' => '<div class="clear">&nbsp;</div>',
+                'end'   => '',
+            ),
+            'indent' => array(
+                'begin' => '<div class="indent">',
+                'end'   => '</div>',
             ),
            'subscript'   => array(
                 'begin'      => '<sub>',
@@ -130,19 +146,21 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
 
     private $_lml;
     private $_codeblocks;
+    private $_nomarkups;
+
 
     
     public function transform($args)
-    {
-        
-        $this->_codeblocks = array();
+    { 
         
         extract($args);
         if(empty($modname) or empty($text)) {
             return $text;
         }
-        PageUtil::addVar('stylesheet', "modules/LuMicuLa/style/transform.css");
-
+        PageUtil::addVar('stylesheet', "modules/LuMicuLa/style/transform.css"); 
+        $this->_codeblocks = array();
+        $this->_nomarkups  = array();
+        
         
         $message = ' ' . $text; // pad it with a space so we can distinguish 
         // between FALSE and matching the 1st char (index 0).
@@ -152,18 +170,8 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         
         
         $message = $this->transform_quotes($message);
-    
-        
-        $message = $this->replace($message, $modname);
-            
-                
-        
-        $message = $this->transform_smilies($message);
-
-
-      
-        // Remove our padding from the string..
-        $message = substr($message, 1);       
+        $message = $this->replace($message, $modname);   
+        $message = $this->transform_smilies($message);       
         
         
         $message = str_replace('<br>', '<br />', $message);
@@ -172,9 +180,11 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         $message = str_replace("LINKREPLACEMENT", "//", $message);
         
         $message = $this->transform_code_post($message);
+        $message = $this->transform_nomarkup_post($message);
         $message = $this->imageViewer($message);      
         
-
+        // Remove our padding from the string..
+        $message = substr($message, 1);
         return $message;
 
     }
@@ -212,12 +222,13 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     
     protected function replace2($message, $elements, $replaces, $lml)
     {
-        foreach($replaces as $tagID => $replaceData) {
-            if(!array_key_exists($tagID, $elements)) {
+        foreach($elements as $tagID => $tagData) {
+            if(!array_key_exists($tagID, $replaces)) {
                 continue;
             }
+            //print_r($tagID);
             
-            $tagData = $elements[$tagID];
+            $replaceData = $replaces[$tagID];
 
             $func = null; $subitems = null;
             extract($tagData);// begin, end, func
@@ -328,7 +339,6 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     }
     
     
-    
     protected function transform_code_post($message)
     {
         for($i = 0; $i < count($this->_codeblocks); $i++) {
@@ -340,7 +350,32 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             $message = str_replace('CODEBLOCK'.$i, $code, $message);
         }
         return $message;
+    }    
+    
+        
+    public function transform_nomarkup($nomarkup)
+    {
+        $c = count($this->_nomarkups);
+        $this->_nomarkups[$c] = $nomarkup;
+        return 'NOMARKUP'.$c;
+
     }
+    
+        
+    
+    protected function transform_nomarkup_post($message)
+    {
+        for($i = count($this->_nomarkups)-1; $i > -1 ; $i--) {
+            $nomarkup = $this->_nomarkups[$i];
+            $args = array(
+                'text' => $nomarkup
+            );
+            $message = str_replace('NOMARKUP'.$i, $nomarkup, $message);
+        }
+        return $message;
+    }    
+    
+
     
     
     protected function transform_smilies($message)

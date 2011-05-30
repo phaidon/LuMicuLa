@@ -23,75 +23,33 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
     public function elements()
     {
         return array(
+        
+            'bold' => array(
+                'begin' => '**',
+                'end'   => '**',
+            ),
+
+            'box' => array(
+                'begin' => "<<",
+                'end'   => '<<',
+            ),
+            'center' => array(
+                'begin' => '@@',
+                'end'   => '@@',
+            ),
             'code' => array(
                 'begin' => '%%',
                 'end'   => '%%',
                 'func'  => true,
             ),
-            'img' => array(
-                'begin' => '{{image ',
-                'inner' => 'url=&quot;http://www.example.com/image.png&quot;',
+            'color' => array(
+                'begin' => '{{color ',
                 'end'   => '}}',
-                'func'  => true,
+                'func'  => true
             ),
-           'page' => array(
-                'begin' => '[[',
-                'inner' => $this->__('Page').' '.$this->__('Page Title'),
-                'end'   => ']]',
-            ),
-            'link' => array(
-                'begin' => '[[',
-                'inner' => $this->__('http://www.example.com').' '.$this->__('Url Title'),
-                'end'   => ']]',
-                'func'  => true,
-            ),
-            'list' => array(
-                'begin' => '^  \* ',
-                'end'   => '\n$',
-                'inner' => '',
-                'func'  => true,
-                'regexp'=> true // preg_quote
-            ),
-            'hr' => array(
-                'begin' => '----',
-                'inner' => '',
+            'clear' => array(
+                'begin' => '::c::',
                 'end'   => '',
-            ),
-            'bold' => array(
-                'begin' => '**',
-                'end'   => '**',
-            ),
-            'italic' => array(
-                'begin' => '//',
-                'end'   => '//',
-            ),
-            'underline' => array(
-                'begin' => '__',
-                'end'   => '__',
-            ),
-            'strikethrough' => array(
-                'begin' => '++',
-                'end'   => '++',
-            ),
-            'mark' => array(
-                'begin' => "''",
-                'end'   => "''",
-            ),
-            'monospace' => array(
-                'begin' => "##",
-                'end'   => "##",
-            ),
-            'key' => array(
-                'begin' => "#%",
-                'end'   => "#%",
-            ),
-           'subscript'   => array(
-                'begin'      => ',,',
-                'end'        =>  ',,',
-            ),
-            'superscript'=> array(
-                'begin'      => '^^',
-                'end'        =>  '^^',
             ),
             'headings'  => array(
                 'subitems' => array(
@@ -115,25 +73,93 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
                         'begin' => '==',
                         'end'   => '==',
                     ),
+
                 )
-            )
-            
+            ),
+            'hr' => array(
+                'begin' => '----',
+                'inner' => '',
+                'end'   => '',
+            ),
+            'img' => array(
+                'begin' => '{{image ',
+                'inner' => 'url=&quot;http://www.example.com/image.png&quot;',
+                'end'   => '}}',
+                'func'  => true,
+            ),
+            'indent' => array(
+                'begin' => '~',
+                'end'   => "\n",
+            ),
+            'italic' => array(
+                'begin' => '//',
+                'end'   => '//',
+            ),
+            'key' => array(
+                'begin' => "#%",
+                'end'   => "#%",
+            ),
+            'link' => array(
+                'begin' => '[[',
+                'inner' => $this->__('http://www.example.com').' '.$this->__('Url Title'),
+                'end'   => ']]',
+                'func'  => true,
+            ),
+            'list' => array(
+                'begin' => '^  \* ',
+                'end'   => '\n$',
+                'inner' => '',
+                'func'  => true,
+                'regexp'=> true // preg_quote
+            ),              
+            'mark' => array(
+                'begin' => "''",
+                'end'   => "''",
+            ),
+            'monospace' => array(
+                'begin' => "##",
+                'end'   => "##",
+            ),
+            'nomarkup' => array(
+                'begin' => '""',
+                'end'   => '""',
+                'func'  => true,               
+            ),
+           'page' => array(
+                'begin' => '[[',
+                'inner' => $this->__('Page').' '.$this->__('Page Title'),
+                'end'   => ']]',
+            ),
+            'strikethrough' => array(
+                'begin' => '++',
+                'end'   => '++',
+            ),
+            'subscript'   => array(
+                'begin'      => ',,',
+                'end'        =>  ',,',
+            ),
+            'superscript' => array(
+                'begin'      => '^^',
+                'end'        =>  '^^',
+            ),
+            'table' => array(
+                'begin'      => '{{table ',
+                'end'        =>  '}}',
+                'func'       => true,
+            ),
+            'underline' => array(
+                'begin' => '__',
+                'end'   => '__',
+            ),   
         );
     }
  
     public static function img_callback($matches)
-    {
-        $array0 = explode('" ', $matches[1]);
-        $image = array();
-        foreach($array0 as $value) {
-            list($key, $value) = explode('="', $value);
-            if($key == 'url') {
-                $key = 'src';
-            }
-            $image[$key] = $value;
-        }
-                
-        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_image', $image);
+    {        
+        $attributes = ModUtil::apiFunc('LuMicuLa', 'Wakka', 'getAtrributes', $matches[1]);
+        $attributes['src'] = $attributes['url'];
+                   
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_image', $attributes);
     }
     
 
@@ -141,8 +167,13 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
     {
         return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_code', $matches[1]);
     }
- 
     
+    
+    public static function nomarkup_callback($matches)
+    {
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_nomarkup', $matches[1]);
+    }
+ 
  
     public static function link_callback($matches)
     {        
@@ -186,6 +217,65 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
         return $result;
     }
      
+    public static function color_callback($matches)
+    {        
+        $attributes = ModUtil::apiFunc('LuMicuLa', 'Wakka', 'getAtrributes', $matches[1]);
+        extract($attributes);
+        
+        $color = '';
+        if(!empty($fg)) {
+            $color = 'color:'.$fg.';';
+        } else if(!empty($c)) {
+            $color = 'color:'.$c.';';
+        } else if(!empty($hex)) {
+            $color = 'color:'.$hex.';';
+        }
+        $bgcolor = '';
+        if(!empty($bg)) {
+            $bgcolor = 'background-color:'.$bg;
+        }
+        return '<span style="'.$color.$bgcolor.'">'.$text.'</span>';
+    }
     
+    public static function table_callback($matches)
+    {        
+        $attributes = ModUtil::apiFunc('LuMicuLa', 'Wakka', 'getAtrributes', $matches[1]);
+        extract($attributes);
+        
+
+        if(empty($cellpadding)) {
+            $cellpadding = '';
+        } else {
+            $cellpadding = ' cellpadding="'.$cellpadding.'"';
+        }
+
+        $inner = '';
+        $cells = explode(';',$cells);
+                                                    print_r($cells);
+
+        $j = 0;
+        for($i = 1; $i <= $columns; $i++) {
+            $inner .= '<tr>';
+            for($j = $j; $j < $i*count($cells)/$columns; $j++) {
+                if($cells[$j] == '###') {
+                    $cells[$j] = '';
+                }
+
+                $inner .= '<td>'.$cells[$j].'</td>';
+            }
+            $inner .= '</tr>';
+        }        
+        return '<table'.$cellpadding.'>'.$inner.'</table>';
+    }
+    
+    public function getAtrributes($match) {
+        $result = array();
+        $array  = explode('" ', substr($match,0,-1));
+        foreach($array as $value) {
+            list($key, $value) = explode('="', $value);
+            $result[$key] = $value;
+        }
+        return $result;
+    }
     
 }

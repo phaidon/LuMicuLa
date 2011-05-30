@@ -26,20 +26,32 @@
 
 <fieldset>
     <legend>Elements</legend><br />
-    <table cellpadding=5><tr>
+
+
+    <table class="z-admintable">
+        {assign var='i' value=0}
         {foreach from=$elements item='element' key='key'}
-        <td>{img modname='LuMicuLa' src=$element.icon' title=$element.title}</td>
+        {if $i == 0}
+        <tr class="{cycle values="z-odd,z-even"}">
+        {/if}
         <td>{formcheckbox id="$key"}</td>
+        <td>{img modname='LuMicuLa' src=$element.icon' title=$element.title}</td>
+        <td nowrap>{$element.title}</td>
+        {assign var='i' value=$i+1}
+        {if $i == 4}
+        </tr>
+        {assign var='i' value=0}
+        {/if}
         {/foreach}
 
-
-        <td>{img modname='LuMicuLa' src='smiley.png' __title='Smilies'}</td>
+        {if $i == 0}
+        <tr class="{cycle values="z-odd,z-even"}">
+        {/if}       
         <td>{formcheckbox id='smilies'}</td>
+        <td>{img modname='LuMicuLa' src='smiley.png' __title='Smilies'}</td>
+        <td>{gt text='Smilies'}</td
+        </tr>
 
-        <td>{img modname='LuMicuLa' src='headings.png' __title='Headings'}</td>
-        <td>{formcheckbox id='headings'}</td>
-
-  
 
     </tr></table>
 

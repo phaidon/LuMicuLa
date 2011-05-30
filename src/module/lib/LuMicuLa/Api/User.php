@@ -28,6 +28,16 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 'title'        => $this->__('Code'),
                 'inner'        => $this->__('Code'),
             ),
+            'nomarkup'      => array(
+                'icon'         => 'code.png',
+                'title'        => $this->__('No markup'),
+                'inner'        => $this->__('No markup'),
+            ),
+            'table'           => array(
+                'icon'         => 'table.png',
+                'title'        => $this->__('Table'),
+                'inner'        => $this->__('table data'),
+            ),
             'page'          => array(
                 'icon'         => 'page.png',
                 'title'        => $this->__('Page link'),
@@ -56,6 +66,21 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 'icon'         => 'hr.png',
                 'title'        => $this->__('Horrizontal line'),
                 'inner'        => ''
+            ),
+            'box'            => array(
+                'icon'         => 'box.png',
+                'title'        => $this->__('box'),
+                'inner'        => $this->__('boxed text'),
+            ),
+            'clear'            => array(
+                'icon'         => 'box.png',
+                'title'        => $this->__('clear'),
+                'inner'        => '',
+            ),
+            'indent'         => array(
+                'icon'         => 'indent.png',
+                'title'        => $this->__('indent'),
+                'inner'        => $this->__('text'),
             ),
             'italic'        => array(
                 'icon'         => 'italic.png',
@@ -110,11 +135,6 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 'values'       => array(
                     0 => 'red'
                 )
-            ),
-           'table'           => array(
-                'icon'         => 'table.png',
-                'title'        => $this->__('Table'),
-                'inner'        => $this->__('table data'),
             ),
             'key'           => array(
                 'icon'         => 'key.png',

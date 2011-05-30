@@ -89,16 +89,19 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
     
         $all_elements = ModUtil::apiFunc($this->name, 'user', 'elements');
         $all_module_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->findAll();
-        $all_module_settings = $all_module_settings->toArray();        
-        foreach($all_module_settings as $key => $value) {
-            $elements0 = $value['elements'];
-            foreach($elements0 as $key2 => $value2) {
-                if($value2) {
+        $all_module_settings = $all_module_settings->toArray();
+        
+        // add all elements data icon, title, ...
+        foreach($all_module_settings as $key1 => $module_settings) {
+            $elements = array();
+            foreach( $module_settings['elements'] as $key2 => $active) {
+                if($active) {
                     $elements[$key2] = $all_elements[$key2];
                 }
             }
-            $all_module_settings[$key]['elements'] = $elements;
+            $all_module_settings[$key1]['elements'] = $elements;
         }
+        
         
         
         return $this->view->assign('mods', $all_module_settings)
