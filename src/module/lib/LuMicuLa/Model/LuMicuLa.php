@@ -33,7 +33,7 @@ class LuMicuLa_Model_LuMicuLa extends Doctrine_Record
         $this->hasColumn('elements', 'array', array(
             'default' => null
         ));
-        $this->hasColumn('smilies', 'bool', array(
+        $this->hasColumn('smilies', 'boolean', array(
             'default' => false
         ));
 
