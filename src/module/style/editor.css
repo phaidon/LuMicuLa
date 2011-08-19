@@ -1,4 +1,4 @@
-.lumicula_editor_bar {  
+.lumicula_editor_bar {
     border-top-right-radius: 3px;
     -moz-border-radius-topright: 3px;
     -webkit-border-top-right-radius:3px;
@@ -10,29 +10,29 @@
     background: -moz-linear-gradient(top, #fafafa, #f2f2f2); /*gecko*/
     background: linear-gradient(#fafafa, #f2f2f2); /*CSS3*/
     border: 1px #ddd solid;
-    vertical-align:middle;
-    width:98%;
-    padding:4px;
+    vertical-align: middle;
+    width: 98%;
+    padding: 4px;
 }
 
 
-.lumicula_smiley_bar {  
+.lumicula_smiley_bar {
     background: #fafafa; /*non-CSS3 browsers*/
     background: -webkit-gradient(linear,left top, left bottom,from(#fafafa),to(#f2f2f2)); /*webkit*/
     background: -moz-linear-gradient(top, #fafafa, #f2f2f2); /*gecko*/
     background: linear-gradient(#fafafa, #f2f2f2); /*CSS3*/
     border-left: 1px #ddd solid;
     border-right: 1px #ddd solid;
-    vertical-align:middle;
-    width:98%;
-    padding:4px;
+    vertical-align: middle;
+    width: 98%;
+    padding: 4px;
 }
 
 
 .lumicula {
-  border: 1px solid #aaa;
-  font-size: 14px;
-  margin-bottom: 0.7em;
-  padding: 5px;
-  margin-top:-1px;
+    border: 1px solid #aaa;
+    font-size: 14px;
+    margin-bottom: 0.7em;
+    padding: 5px;
+    margin-top: -1px;
 }

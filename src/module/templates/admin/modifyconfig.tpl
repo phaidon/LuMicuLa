@@ -1,12 +1,8 @@
-{include file="admin/header.tpl"}
-
-<div class="z-adminpageicon">{icon type="config" size="large"}</div>
-
-<h2>{gt text="Settings"}</h2>
-
-
-
-
+{adminheader}
+<div class="z-admin-content-pagetitle">
+    {icon type="config" size="small"}
+    <h3>{gt text="Settings"}</h3>
+</div>
 
 {form cssClass="z-form"}
 {formvalidationsummary}
@@ -31,6 +27,4 @@
 
 {/form}
 
-{modgetinfo info=all}
-<p class="z-center"><a href="http://code.zikula.org/LuMicuLa/" title="{gt text="Visit the LuMicuLa project site"}">{$modinfo.displayname} {$modinfo.version}</a></p>
-</div>
+{adminfooter}
