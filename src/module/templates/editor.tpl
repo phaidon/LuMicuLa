@@ -60,4 +60,4 @@
 </div>
 {/if}
 
-<input type="hidden" id='lumicula_textfieldname' value='{$textfieldname}'>
+<input type="hidden" id='lumicula_textfieldname' value='{$textfieldname}' />
