@@ -440,7 +440,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             }
         }
         
-        return "<a href='$url'>$title</a>";      
+        return '<a href="'.DataUtil::formatForDisplay($url).'">'.DataUtil::formatForDisplay($title).'</a>';
         
     }
 
@@ -480,14 +480,13 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             $url = ModUtil::url('Wikula', 'user', 'main', array('tag' => $tag) );
             if( !ModUtil::apiFunc('Wikula', 'user', 'PageExists', array('tag'=>$tag)) ) {
                 $url   = str_replace("//", "LINKREPLACEMENT", $url);
-                return "$tag<a href='$url'>?</a>";
+                return DataUtil::formatForDisplay($tag).'<a href="'.DataUtil::formatForDisplay($url).'">?</a>';
             }
             break;
         }
 
-        return "<a href='$url'>$title</a>"; 
     }
-    
+    //DataUtil::formatForDisplay
     protected function quote_callback($matches)
     {      
        if(substr($matches[1], 0, 1) == "]") {
@@ -555,7 +554,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 PageUtil::addVar('javascript', $path.'scripts/shBrushJScript.js');
                 PageUtil::addVar('stylesheet', $path.'styles/shCoreDefault.css');
                 PageUtil::addVar('header', '<script type="text/javascript">SyntaxHighlighter.all()</script>');                
-                $text = '<pre class="brush: js;">'.$text.'</pre>';
+                $text = '<pre class="brush: js">'.$text.'</pre>';
                 break;
         }
         
