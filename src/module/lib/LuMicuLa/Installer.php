@@ -50,6 +50,7 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
         $d->elements = array('bold' => true);
         $d->save();
 
+        $this->setVar('syntaxHighlighters', 'syntaxhighlighter');
         $this->setVar('imageViewer', true);
         
     }
