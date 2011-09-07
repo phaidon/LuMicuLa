@@ -384,7 +384,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         }
         $smilies = ModUtil::apiFunc($this->name, 'Smilies', 'smilies');
         foreach($smilies as $tag => $icon) {
-            $message = str_replace($tag, '<img src="modules/LuMicuLa/images/smilies/'.$icon.'" title="'.$tag.'" alt="'.$tag.'">', $message);
+            $message = str_replace($tag, '<img src="modules/LuMicuLa/images/smilies/'.$icon.'" title="'.$tag.'" alt="'.$tag.'" />', $message);
         }
         return $message;
     }
@@ -408,11 +408,11 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
        
         if(empty($title)) {
             return '<a href="'.$src.'" rel="imageviewer">'.
-                   '<img src="'.$src.'" width="250">'.
+                   '<img src="'.$src.'" width="250" />'.
                    '</a>';
         }        
         return '<a href="'.$src.'" rel="imageviewer">'.
-               '<img src="'.$src.'" title="'.$title.'" alt="'.$title.'" width="250">'.
+               '<img src="'.$src.'" title="'.$title.'" alt="'.$title.'" width="250" />'.
                '</a>';
     }
 

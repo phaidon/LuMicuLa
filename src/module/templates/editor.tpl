@@ -47,7 +47,7 @@
 <div id="lumicula_smiley_bar" class="lumicula_smiley_bar" style="display: none;">
     {foreach from=$smilies item="icon" key="tag"}
     {assign var='tag' value=$tag|safetext}
-    {img modname='LuMicuLa' src="smilies/$icon|safetext" title=$tag onclick="insertAtCursor('$textfieldname', '$tag', '', '');return false"}
+    {img modname='LuMicuLa' src="smilies/$icon" title=$tag onclick="insertAtCursor('$textfieldname', '$tag', '', '');return false"}
     {/foreach}
 </div>
 {/if}

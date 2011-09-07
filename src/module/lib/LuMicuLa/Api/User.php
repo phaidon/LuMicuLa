@@ -64,7 +64,7 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
             ),
             'hr'            => array(
                 'icon'         => 'hr.png',
-                'title'        => $this->__('Horrizontal line'),
+                'title'        => $this->__('Horizontal line'),
                 'inner'        => ''
             ),
             'box'            => array(
@@ -228,9 +228,9 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                $lmlElements = ModUtil::apiFunc($this->name, $lml, 'elements'); 
                if(array_key_exists($key, $lmlElements)) {
                    if(array_key_exists('func', $lmlElements[$key]) and $lmlElements[$key]['func']) {
-                      $tags[$key]['lmls'][$lml] = '<i>'.$this->__('Function').'</i>';
+                      $tags[$key]['lmls'][$lml] = '<em>'.$this->__('Function').'</em>';
                    } else if(array_key_exists('subitems', $lmlElements[$key])) {
-                      $tags[$key]['lmls'][$lml] = '<i>'.$this->__('Super tag').'</i>';
+                      $tags[$key]['lmls'][$lml] = '<em>'.$this->__('Super tag').'</em>';
                    } else {
                        $inner = '';
                        if(array_key_exists('inner', $lmlElements[$key])) {
@@ -246,7 +246,7 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                        $tags[$key]['lmls'][$lml] = $lmltag;
                    }
                } else {
-                   $tags[$key]['lmls'][$lml] = '<i>'.$this->__('Not available').'</i>';
+                   $tags[$key]['lmls'][$lml] = '<em>'.$this->__('Not available').'</em>';
                }
            }
            

@@ -251,7 +251,7 @@ class LuMicuLa_Api_Wakka extends Zikula_AbstractApi
 
         $inner = '';
         $cells = explode(';',$cells);
-                                                    print_r($cells);
+        // print_r($cells);
 
         $j = 0;
         for($i = 1; $i <= $columns; $i++) {
