@@ -20,7 +20,7 @@ class LuMicuLa_Version extends Zikula_AbstractVersion
         $meta['description']    = __('A lightweight markup language editor');
         $meta['displayname']    = __('LuMicuLa');
         //!url must be different to displayname
-        $meta['url']            = __('LuMicuLa');
+        $meta['url']            = __('luMicuLa');
         $meta['version']        = '0.1.0';
         $meta['author']         = 'Fabian Wuertz';
         $meta['contact']        = 'fabian.wuertz.org';

@@ -35,7 +35,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'end'       => '</a>',
             ),
             'hr' => array(
-                'begin'     => '<hr>',
+                'begin'     => '<hr />',
                 'end'       => '',
             ),
             'img' => array(
