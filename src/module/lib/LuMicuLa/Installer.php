@@ -49,6 +49,12 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
         $d->language = 'Creole';
         $d->elements = array('bold' => true);
         $d->save();
+        
+        $d = new LuMicuLa_Model_LuMicuLa();
+        $d->modname = 'Wikula';
+        $d->language = 'Wakka';
+        $d->elements = array('bold' => true);
+        $d->save();
 
         $this->setVar('syntaxHighlighters', 'syntaxhighlighter');
         $this->setVar('imageViewer', true);

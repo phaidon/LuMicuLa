@@ -53,6 +53,11 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
         
         $editor_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')
                            ->findOneBy('modname', $modname);
+        
+        if(!$editor_settings) {
+            return LogUtil::registerError(__("There are no LuMiCuLa settings for this module! Please contact the site admin to solve this problem!"));
+        }
+        
         $editor_settings = $editor_settings->toArray();
         
         
