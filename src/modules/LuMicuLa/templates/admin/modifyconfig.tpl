@@ -24,6 +24,13 @@
         {formcheckbox id='imageViewer'}
     </div>
 
+    
+    <div class="z-formrow">
+        {formlabel for="imageViewer" __text="Javascript pop-ups for images"}
+        {formintinput id='link_shrinksize'}
+    </div>
+    
+    
 </fieldset>
 
 <div class="z-formbuttons z-buttons">

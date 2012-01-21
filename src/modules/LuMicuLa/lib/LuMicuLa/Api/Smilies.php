@@ -16,10 +16,11 @@ class LuMicuLa_Api_Smilies extends Zikula_AbstractApi
 
     public function smilies() { 
         return array(
+            'O:-)'       => 'angel.png',
+            ']:-)'       => 'twisted.png',
             ':-)'        => 'happy.png',
             ';-)'        => 'wink.png',
             ':-('        => 'sad.png', 
-            'O:-)'       => 'angel.png',
             ':-x'        => 'angry.png',
             ':arrow:'    => 'arrow.png',
             ':-D'        => 'biggrin.png',
@@ -40,28 +41,28 @@ class LuMicuLa_Api_Smilies extends Zikula_AbstractApi
             ':->'        => 'smile.png',
             ':-o'        => 'surprised.png',
             ':thumbsup:' => 'thumbsup.png',
-            ']:-)'       => 'twisted.png',
         );
     }
     
     public function alternative_smilies() { 
         return array(
-            ':)'        => ':-)',
-            ';)'        => ';-)',
-            ':('        => ':-(', 
-            'O:)'       => 'O:-)',
-            ':x'        => ':-x',
-            ':D'        => ':-D',
-            ':?'        => ':-?',
-            '8)'        => '8-)',
-            ';('        => ';-(',
-            '8o'        => '8-o',
-            ']:('       => ']:-(',
-            ':P'        => ':-P',
-            ':$'        => ':-$',
-            ':>'        => ':->',
-            ':o'        => ':-o',
-            ']:)'       => ']:-)',
+            // short ones
+            'O:)'       => 'angel.png',
+            ']:)'       => 'twisted.png',
+            ':)'        => 'happy.png',
+            ';)'        => 'wink.png',
+            ':('        => 'sad.pnh', 
+            ':x'        => 'angry.png',
+            ':D'        => 'biggrin.png',
+            ':?'        => 'confused.png',
+            '8)'        => 'cool.png',
+            ';('        => 'cry.png',
+            '8o'        => 'cry.png',
+            ']:('       => 'evil.png',
+            ':P'        => 'razz.png',
+            ':$'        => 'redface.gif',
+            ':>'        => 'smile.png',
+            ':o'        => 'surprised.png',
         );
     }
    

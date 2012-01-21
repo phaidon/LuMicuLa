@@ -297,7 +297,6 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             if(!array_key_exists($tagID, $replaces)) {
                 continue;
             }
-            //print_r($tagID);
             
             $replaceData = $replaces[$tagID];
 
@@ -389,7 +388,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         }  
         
         $expression = "#".$begin."(.*?)".$end."#".$pattern;
-        $expression = str_replace('VALUE', '(.*?)', $expression);
+        $expression = str_replace('VALUE', '([a-zA-Z0-9|\-]*?)', $expression);
         $this->_current_replace = $replace;  
         
         
@@ -468,15 +467,16 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     
 
     protected function transform_smilies($message)
-    {   
+    {
+        $message = str_replace('font-size:x', 'font-sizeLMLCOLONx', $message);
         $alternative_smilies = ModUtil::apiFunc($this->name, 'Smilies', 'alternative_smilies');
-        foreach($alternative_smilies as $tag1 => $tag2) {
-            $message = str_replace($tag1, $tag2, $message);
-        }
         $smilies = ModUtil::apiFunc($this->name, 'Smilies', 'smilies');
+        $smilies = array_merge($smilies, $alternative_smilies);
         foreach($smilies as $tag => $icon) {
-            $message = str_replace($tag, '<img src="modules/LuMicuLa/images/smilies/'.$icon.'" title="'.$tag.'" alt="'.$tag.'" />', $message);
+            $img = '<img src="'.System::getBaseUrl().'/modules/LuMicuLa/images/smilies/'.$icon.'" title="'.$tag.'" alt="'.$tag.'" />';
+            $message = str_replace($tag, $img, $message);
         }
+        $message = str_replace('LMLCOLON', ':', $message);
         return $message;
     }
     
@@ -524,33 +524,32 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             return $this->transform_page($url, $title);
         }
         
-                
         $url = str_replace("//", "LINKREPLACEMENT", $url);
         if(is_null($title) ) {
             if($mailto) {
                 $title = substr($url, 7);
             } else {
                 $title = $url;
-                $title = ModUtil::apiFunc($this->name, 'transform', 'minimize_displayurl', $title);
+                $title = self::minimize_displayurl($title);
             }
         }
         return '<a href="'.DataUtil::formatForDisplay($url).'">'.DataUtil::formatForDisplay($title).'</a>';
         
     }
     
-     public static function link_callback($matches)
+    public static function link_callback($matches)
     {        
         $link = array();
         
         if (empty($matches[1])) {
             $link['url']   = $matches[2];
-            $link['title'] = $matches[2];
+            $link['title'] = null;
         } else {
             $link['url']   = $matches[1];
             $link['title'] = $matches[2];
         }
 
-        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
+        return self::transform_link($link);
     }
 
     protected function transform_page($tag, $title)
@@ -622,11 +621,11 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     public function minimize_displayurl($displayurl)
     {
         // get the maximum size of the urls to show
-        $maxsize = $this->getVar('link_shrinksize', 50);
+        $maxsize = ModUtil::getVar('LuMicuLa', 'link_shrinksize', 50);
         if($maxsize<>0 && strlen($displayurl) > $maxsize) {
             $before = round($maxsize / 2);
             $after  = $maxsize - 1 - $before;
-            $displayurl = substr($displayurl, 0, $before) . "&hellip;" . substr($displayurl, strlen($displayurl) - $after, $after);
+            $displayurl = substr($displayurl, 0, $before) . " ... " . substr($displayurl, strlen($displayurl) - $after, $after);
         }
         return $displayurl;
     }
