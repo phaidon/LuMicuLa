@@ -1,6 +1,6 @@
 Event.observe(window, 'load', textarea_width_correction, false);  
 
-function textarea_width_correction() {;
+function textarea_width_correction() {
     var textfieldname = $('lumicula_textfieldname').getValue();
     var ww = $(textfieldname).getWidth() - 10;
     var vv = ww - 2;
@@ -10,7 +10,7 @@ function textarea_width_correction() {;
     $('lumicula_smiley_bar').setStyle({
         width:ww + 'px'
     });
-    $(textfieldname).addClassName('lumicula')
+    $(textfieldname).addClassName('lumicula');
     $(textfieldname).setStyle({
         width:vv + 'px',
         padding:'5px'
@@ -38,7 +38,7 @@ function insertAtCursor(textfieldname, startTag, middleTag, endTag) {
         range.text = startTag + insText + endTag;
         /* Anpassen der Cursorposition */
         range = document.selection.createRange();
-        if (insText.length == 0) {
+        if (insText.length === 0) {
             range.move('character', -endTag.length);
         } else {
             range.moveStart('character', startTag.length + insText.length + endTag.length);      
@@ -49,17 +49,15 @@ function insertAtCursor(textfieldname, startTag, middleTag, endTag) {
     else if (textfield.selectionStart || textfield.selectionStart == '0') {
         var startPos = textfield.selectionStart;
         var endPos   = textfield.selectionEnd; 
-        if(endPos-startPos != 0) {
+        if(endPos-startPos !== 0) {
                 middleTag = textfield.value.substring(startPos, endPos);
         }
         myValue = startTag + middleTag + endTag;
 
 
-        textfield.value = textfield.value.substring(0, startPos)
-        + myValue
-        + textfield.value.substring(endPos, textfield.value.length);
+        textfield.value = textfield.value.substring(0, startPos) + myValue + textfield.value.substring(endPos, textfield.value.length);
 
-        if(endPos-startPos == 0) {
+        if(endPos-startPos === 0) {
                 textfield.selectionStart = startPos+startTag.length;
                 textfield.selectionEnd   = startPos+startTag.length+middleTag.length;
         } else {
