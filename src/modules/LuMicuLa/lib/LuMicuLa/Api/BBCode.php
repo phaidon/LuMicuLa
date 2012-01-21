@@ -193,6 +193,15 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
         return '<ul>'.$result.'</ul>';
     }
    
+    
+    public function extractCategories($message)
+    {
+        // there are no categories in BBCode
+        return $message;
+    }
+    
+    
+    
 
     
 }

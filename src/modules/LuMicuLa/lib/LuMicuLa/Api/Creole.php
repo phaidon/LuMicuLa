@@ -189,4 +189,56 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
         return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
     }
     
+    
+    public function extractCategories($message)
+    {
+        
+        $message = preg_replace_callback(
+            "#\n\[\[Category(.*?)\]\]#si",
+            array('LuMicuLa_Api_Transform', 'categoryCallback'),
+            $message
+        );
+        $message = preg_replace_callback(
+            "#\nCategory([a-zA-Z0-9]*+)#si",
+            array(LuMicuLa_Api_Transform, 'categoryCallback'),
+            $message
+        );
+        return $message;
+    }
+    
+    
+    public function getPageCategories($text) {
+        $categories = array();        
+        preg_match_all("/\n\[\[Category(.*?)\]\]/", $text, $categories);
+        $categories = $categories[1];
+        $categories2 = array();        
+        preg_match_all("/\nCategory([a-zA-Z0-9]*+)/", $text, $categories2);
+        $categories2 = $categories2[1];
+        $categories = array_merge($categories, $categories2);
+        
+        foreach($categories as $key => $value) {
+            $value = explode(' ', $value);
+            $value = $value[0];
+            $categories[$key] = $value;
+        }
+        return array_unique($categories);
+    }
+    
+    
+    public function getPageLinks($text) {
+        $links = array();
+        $pagelinks = array();
+        preg_match_all("/\[\[(.*?)\]\]/", $text, $links);
+        $links = $links[1];
+        foreach($links as $link) {
+            $link = explode('|', $link);
+            // check if link is a hyperlink
+            if( strstr($link[0], '://' ) or strstr($link[0], '@' ) ) {
+                continue;
+            }
+            $pagelinks[] = $link[0];                 
+        }
+        return array_unique($pagelinks);
+    }
+    
 }

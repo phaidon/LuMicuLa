@@ -15,6 +15,7 @@
 class LuMicuLa_Api_Transform extends Zikula_AbstractApi 
 {
 
+    
     public function replaces()
     {
         return array(
@@ -144,9 +145,10 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     * @return wiki-formatted text
     */
 
-    private $_lml;
-    private $_codeblocks;
-    private $_nomarkups;
+    private $_lml        = array();
+    private $_codeblocks = array();
+    private $_nomarkups  = array();
+    private $categories  = array();
 
 
     
@@ -157,17 +159,24 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         if(empty($modname) or empty($text)) {
             return $text;
         }
+        $this->loadEditorSettings($modname);
+        
+                
         PageUtil::addVar('stylesheet', "modules/LuMicuLa/style/transform.css"); 
         $this->_codeblocks = array();
         $this->_nomarkups  = array();
+        
+        
         
         
         $message = ' ' . $text; // pad it with a space so we can distinguish 
         // between FALSE and matching the 1st char (index 0).
         // This is important; bbencode_quote(), bbencode_list(), and 
         // bbencode_code() all depend on it.
-         unset($text);
+        unset($text);
         
+        
+        $message = $this->extractCategories($message, $modname);
         
         $message = $this->transform_quotes($message);
         $message = $this->replace($message, $modname);   
@@ -183,6 +192,10 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         $message = $this->transform_nomarkup_post($message);
         $message = $this->imageViewer($message);      
         
+ 
+        $message .= $this->categoriesBox();
+        
+        
         // Remove our padding from the string..
         $message = substr($message, 1);
         return $message;
@@ -191,20 +204,77 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     
     
     
-    protected function replace($message, $modname)
+    public function extractCategories($message, $modname)
     {
-       // get the light markup language of the current module
+        
+        $editor_settings = $this->_lml[$modname];
+        $lml = $editor_settings['language'];
+        return ModUtil::apiFunc($this->name, $lml, 'extractCategories', $message );
+        
+    }
+    
+    
+    public function categoryCallback($things)
+    {
+        $things = explode(' ', $things[1]);
+        $category = $things[0];
+        $title  = str_replace('_', ' ', $category);
+        
+        $url = ModUtil::url(
+            'Wikula',
+            'user',
+            'category',
+            array('category' => $category)
+        );
+        ModUtil::apiFunc('LumiCuLa', 'Transform', 'addCategory', '<a href="'.$url.'">'.$title.'</a>');
+        
+    }
+
+    
+    public function addCategory($category)
+    {
+        $this->categories[] = $category;
+    }
+    
+    
+    
+    private function categoriesBox()
+    {   
+        
+        if( count($this->categories) > 0) {
+            if( count($this->categories) == 1 ) {
+                $categories = $this->__('Category');
+            } else {
+                $categories = $this->__('Categories');
+            }
+            $categories = '<div class="wikula_categories">'.$categories.': '.implode(', ', $this->categories).'</div>';
+        } else {
+            $categories = '';
+        }
+        return $categories;
+            
+    }
+    
+    
+    public function loadEditorSettings($modname) {
+        
+        // get the light markup language of the current module
         if(!is_array($this->_lml) or !array_key_exists($modname, $this->_lml)) {
             $editor_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->find($modname);
-            if(!$editor_settings) {
-                return $message;
-            }
             $editor_settings = $editor_settings->toArray();
             $this->_lml[$modname] = $editor_settings;
-        } else {
-            $editor_settings = $this->_lml[$modname];
         }
-                
+    }
+    
+    
+    protected function replace($message, $modname)
+    {
+        
+
+        $editor_settings = $this->_lml[$modname];
+        if(count($editor_settings) == 0) {
+            return $message;
+        }
         $lml = $editor_settings['language'];
         
         
@@ -417,19 +487,23 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     }
 
     public function transform_link($link)
-    {    
-        extract($link);
-        if(empty($title)) {
-            $title = null;
+    {
+        
+        if(empty($link['title'])) {
+            $link['title'] = null;
         }
         
+        $url = $link['url'];
+        $title = $link['title'];
         $mailto = substr($url, 0, 6) == 'mailto';
+        
         
         $pos = strpos($url, '://');
         if( $pos === false and !$mailto) {
             return $this->transform_page($url, $title);
         }
         
+                
         $url = str_replace("//", "LINKREPLACEMENT", $url);
         if(is_null($title) ) {
             if($mailto) {
@@ -439,24 +513,25 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 $title = ModUtil::apiFunc($this->name, 'transform', 'minimize_displayurl', $title);
             }
         }
-        
         return '<a href="'.DataUtil::formatForDisplay($url).'">'.DataUtil::formatForDisplay($title).'</a>';
         
     }
 
-    protected function transform_page($url, $title)
+    protected function transform_page($tag, $title)
     {
-        if(is_null($title)) {
-            $title = $url;
-        }
         
-        $pos = strpos($url, ':');
+        $pos = strpos($tag, ':');
         if($pos === false) {
-            $url = 'wiki:'.$url;
+            $tag = 'wiki:'.$tag;
         }
 
-        list($goto, $id) = explode(':', $url);
-        switch ($goto) {
+        list($module, $id) = explode(':', $tag);
+        
+        if(is_null($title)) {
+            $title = $id;
+        }
+        
+        switch ($module) {
         case 'post':
             $url = ModUtil::url('Dizkus', 'user', 'viewtopic', array(
                 'topic' => $id
@@ -473,17 +548,17 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             ));
             break;
          case 'wiki':
-            $tag = $id;
-            if(empty($title)) {
-                $title = $tag;
-            }
-            $url = ModUtil::url('Wikula', 'user', 'main', array('tag' => $tag) );
-            if( !ModUtil::apiFunc('Wikula', 'user', 'PageExists', array('tag'=>$tag)) ) {
+            if( !ModUtil::apiFunc('Wikula', 'user', 'PageExists', array('tag' => $id)) )
+            {
+                $url = ModUtil::url('Wikula', 'user', 'edit', array('tag' => $id) );
                 $url   = str_replace("//", "LINKREPLACEMENT", $url);
-                return DataUtil::formatForDisplay($tag).'<a href="'.DataUtil::formatForDisplay($url).'">?</a>';
+                return DataUtil::formatForDisplay($id).'<a href="'.DataUtil::formatForDisplay($title).'">?</a>';
             }
+            $url = ModUtil::url('Wikula', 'user', 'show', array('tag' => $id) );
             break;
         }
+        $url   = str_replace("//", "LINKREPLACEMENT", $url);
+        return '<a href="'.DataUtil::formatForDisplay($url).'">'.DataUtil::formatForDisplay($title).'</a>';
 
     }
     //DataUtil::formatForDisplay
@@ -578,6 +653,17 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             PageUtil::addVar('footer', $footer);
         }
         return $message;
+    }
+    
+    public function getLanguage($modname)
+    {
+        $this->loadEditorSettings($modname);
+        $editor_settings = $this->_lml[$modname];
+        if(count($editor_settings) == 0) {
+            return false;
+        }
+        return $editor_settings['language'];
+    
     }
     
     

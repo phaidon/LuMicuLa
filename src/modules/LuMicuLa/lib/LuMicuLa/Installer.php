@@ -52,7 +52,7 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
         
         $d = new LuMicuLa_Model_LuMicuLa();
         $d->modname = 'Wikula';
-        $d->language = 'Wakka';
+        $d->language = 'Wikka';
         $d->elements = array('bold' => true);
         $d->save();
 

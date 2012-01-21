@@ -181,8 +181,8 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 
         if(count($editor_settings) > 0) {
             switch ($editor_settings['language']) {
-                case 'Wakka':
-                    $lmlElements = ModUtil::apiFunc($this->name, 'Wakka',  'elements');
+                case 'Wikka':
+                    $lmlElements = ModUtil::apiFunc($this->name, 'Wikka',  'elements');
                     break;
                 case 'BBCode':
                     $lmlElements = ModUtil::apiFunc($this->name, 'BBCode', 'elements');
@@ -222,7 +222,7 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         $tags     = ModUtil::apiFunc($this->name, 'user',      'elements');
         foreach($tags as $key => $value) {
 
-           $lmls = array('BBCode', 'Creole', 'Wakka');
+           $lmls = array('BBCode', 'Creole', 'Wikka');
             
            foreach($lmls as $lml) {
                $lmlElements = ModUtil::apiFunc($this->name, $lml, 'elements'); 

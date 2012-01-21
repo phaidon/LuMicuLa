@@ -99,11 +99,27 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
     public static function filter(Zikula_FilterHook $hook)
     {
         $text = $hook->getData();
-        $text = ModUtil::apiFunc('LuMicuLa', 'transform', 'transform', array(
-            'text'   => $text,
-            'modname' => $hook->getCaller())
-        );
+                
+        if($hook->getCaller() == 'WikulaSaver') {
+            $language = ModUtil::apiFunc('LuMicuLa', 'transform', 'getLanguage', 'Wikula');
+            if($language == false) {
+                return false;
+            }
+            
+            $data = array();
+            $data['links']      = ModUtil::apiFunc('LumiCuLa', $language, 'getPageLinks', $text);
+            $data['categories'] = ModUtil::apiFunc('LumiCuLa', $language, 'getPageCategories', $text);
+            $text = $data;
+        } else {
+            $text = ModUtil::apiFunc('LuMicuLa', 'transform', 'transform', array(
+                'text'   => $text,
+                'modname' => $hook->getCaller())
+            );
+        }
+                
         $hook->setData($text);
+        
+        
     }
 
 
