@@ -165,6 +165,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         PageUtil::addVar('stylesheet', "modules/LuMicuLa/style/transform.css"); 
         $this->_codeblocks = array();
         $this->_nomarkups  = array();
+        $this->categories  = array();
         
         
         
@@ -328,9 +329,14 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         return $message;
     }
     
+    
+    
+    
     protected function transform_func($message, $tag, $tagData, $lml)
-    {        
+    {     
+        $func = '';
         extract($tagData);
+        $func    = $tagData['func'];
         $pattern = 'si';
         if(!empty($regexp) and $regexp) {
             $pattern .= 'm';
@@ -338,19 +344,30 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             $begin = preg_quote($begin,'/');
             $end   = preg_quote($end,'/');
         }
+        
         if($func == 1) {
-             $expression = "#".$begin."(.*?)".$end."#".$pattern;
+            $expression = "#".$begin."(.*?)".$end."#".$pattern;
         } else {
             $func = preg_quote($func,'/');
             $func = str_replace('VALUE', "(.*?)", $func);
+            $func = str_replace('\=', "\=?", $func);
             $expression = "#".$func."#".$pattern;
         }
+        
+        if (isset($gfunc) and $gfunc) {
+            $message = preg_replace_callback(
+                $expression,
+                array($this, $tag.'_callback'),
+                $message
+            );
+        } else {
 
-        $message = preg_replace_callback(
-            $expression,
-            array('LuMicuLa_Api_'.$lml, $tag.'_callback'),
-            $message
-        );
+            $message = preg_replace_callback(
+                $expression,
+                array('LuMicuLa_Api_'.$lml, $tag.'_callback'),
+                $message
+            );
+        }
         
         return $message;
     }
@@ -405,7 +422,11 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         $c = count($this->_codeblocks);
         $this->_codeblocks[$c] = $code;
         return 'CODEBLOCK'.$c;
-
+    }
+    
+    public static function code_callback($matches)
+    {
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_code', $matches[1]);
     }
     
     
@@ -515,6 +536,21 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         }
         return '<a href="'.DataUtil::formatForDisplay($url).'">'.DataUtil::formatForDisplay($title).'</a>';
         
+    }
+    
+     public static function link_callback($matches)
+    {        
+        $link = array();
+        
+        if (empty($matches[1])) {
+            $link['url']   = $matches[2];
+            $link['title'] = $matches[2];
+        } else {
+            $link['url']   = $matches[1];
+            $link['title'] = $matches[2];
+        }
+
+        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
     }
 
     protected function transform_page($tag, $title)

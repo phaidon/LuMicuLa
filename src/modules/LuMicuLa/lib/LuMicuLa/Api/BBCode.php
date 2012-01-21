@@ -14,21 +14,18 @@
 class LuMicuLa_Api_BBCode extends Zikula_AbstractApi 
 {
     
-    /**
-    * BBCode elements
-    *
-    * @see http://www.bbcode.org/reference.php
-    * @return list of BBCode elements
-    */ 
+    private $elements = array();
+    
+    
+    public function __construct() {
         
-    public function elements()
-    {
-         
-        return array(
+        // define elements
+        $this->elements = array(
             'code' => array(
                 'begin' => '[code]',
                 'end'   => '[/code]',
                 'func'  => true,
+                'gfunc' => true // general func
             ),
             'img' => array(
                 'begin' => '[img]',
@@ -45,7 +42,8 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
                 'begin' => '[url]',
                 'inner' => $this->__('http://www.example.com'),
                 'end'   => '[/url]',
-                'func'  => true
+                'func'  => '[url=VALUE]VALUE[/url]',
+                'gfunc' => true // general func
             ),
             'list' => array(
                 'begin' => '[list] [*]',
@@ -98,7 +96,7 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
                 'begin' => '[youtube]',
                 'end'   => '[/youtube]',
             ),
-           'subscript'   => array(
+            'subscript'   => array(
                 'begin'      => '[sub]',
                 'end'        =>  '[/sub]',
             ),
@@ -141,6 +139,18 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
         );
     }
     
+    /**
+    * BBCode elements
+    *
+    * @see http://www.bbcode.org/reference.php
+    * @return list of BBCode elements
+    */ 
+        
+    public function elements()
+    {
+        return $this->elements;
+    }
+    
         
     public static function img_callback($matches)
     {
@@ -154,17 +164,6 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
     }
     
     
-    public static function code_callback($matches)
-    {
-        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_code', $matches[1]);
-    }
-    
-    
-    public static function link_callback($matches)
-    {        
-        $link['url'] =  $matches[1];
-        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
-    }
     
     public static function table_callback($matches)
     {        
