@@ -53,3 +53,10 @@
 {/if}
 
 <input type="hidden" id='lumicula_textfieldname' value='{$textfieldname}' />
+
+<script type="text/javascript">
+    // move the bar before the textfied
+    var bar = document.getElementById('lumicula_editor_bar');
+    var parentDiv = {{$textfieldname}}.parentNode;
+    parentDiv.insertBefore(bar, {{$textfieldname}});
+ </script>

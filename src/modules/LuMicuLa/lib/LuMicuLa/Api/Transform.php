@@ -552,7 +552,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             {
                 $url = ModUtil::url('Wikula', 'user', 'edit', array('tag' => $id) );
                 $url   = str_replace("//", "LINKREPLACEMENT", $url);
-                return DataUtil::formatForDisplay($id).'<a href="'.DataUtil::formatForDisplay($title).'">?</a>';
+                return DataUtil::formatForDisplay($title).'<a href="'.DataUtil::formatForDisplay($url).'">?</a>';
             }
             $url = ModUtil::url('Wikula', 'user', 'show', array('tag' => $id) );
             break;
