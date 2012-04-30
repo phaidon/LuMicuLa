@@ -130,12 +130,16 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 ),
              ),
             'youtube' => array(
+                'begin' => '<object width="640" height="390"></param><param name="allowScriptAccess" value="always"></param><embed src="https://www.youtube.com/v/',
+                'end'   => '?version=3&autoplay=1" type="application/x-shockwave-flash" allowscriptaccess="always" width="640" height="390"></embed></object>'
+            )
+            // the iframe solution makes problem with the Dizkus edit/quote buttons
+            /*'youtube' => array(
                 'begin' => '<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/',
                 'end'   => '" frameborder="0">'
-            )
+            )*/
         );
     }
-    
     
     
    /**

@@ -200,7 +200,38 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
     }
     
     
-    
+    public function getPageLinks($text = '') {
+        $links = array();
+        $pagelinks = array();
+        preg_match_all("/\[\[(.*?)\]\]/", $text, $links);
+        $links = $links[1];
+        foreach($links as $link) {
+            $link = explode(' ', $link);
+            // check if link is a hyperlink
+            if( strstr($link[0], '://' ) or strstr($link[0], '@' ) ) {
+                continue;
+            }
+            $pagelinks[] = $link[0];                 
+        }
+        return array_unique($pagelinks);
+    }
 
+    
+    public function getPageCategories($text) {
+        $categories = array();        
+        preg_match_all("/\n\[\[Category(.*?)\]\]/", $text, $categories);
+        $categories = $categories[1];
+        $categories2 = array();        
+        preg_match_all("/\nCategory([a-zA-Z0-9]*+)/", $text, $categories2);
+        $categories2 = $categories2[1];
+        $categories = array_merge($categories, $categories2);
+        
+        foreach($categories as $key => $value) {
+            $value = explode(' ', $value);
+            $value = $value[0];
+            $categories[$key] = $value;
+        }
+        return array_unique($categories);
+    }
     
 }
