@@ -51,7 +51,8 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
            $textfieldname = 'textfield';
         }
         
-        $editor_settings = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
+        $em = ServiceUtil::getService('doctrine.entitymanager');
+        $editor_settings = $em->find('LuMicuLa_Entity_LuMicuLa', $modname);
         
         if(!$editor_settings) {
             return LogUtil::registerError(__("There are no LuMiCuLa settings for this module! Please contact the site admin to solve this problem!"));
