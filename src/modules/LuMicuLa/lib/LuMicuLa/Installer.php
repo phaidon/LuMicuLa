@@ -20,10 +20,13 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
     */
     public function install()
     {
+         // create table
         try {
-            DoctrineUtil::createTablesFromModels('LuMicula');
+            DoctrineHelper::createSchema($this->entityManager, array(
+                'LuMicuLa_Entity_LuMicuLa'
+            ));
         } catch (Exception $e) {
-            LogUtil::registerError($e->__toString());
+            LogUtil::registerStatus($e->getMessage());
             return false;
         }
 
@@ -44,17 +47,26 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
      */
     protected function defaultdata()
     {
-        $d = new LuMicuLa_Model_LuMicuLa();
-        $d->modname = 'Tasks';
-        $d->language = 'Creole';
-        $d->elements = array('bold' => true);
-        $d->save();
+        $i = new LuMicuLa_Entity_LuMicuLa();
+        $data = array(
+            'modname'  => 'Tasks',
+            'language' => 'Creole',
+            'elements' => array('bold' => true)
+        );
+        $i->setAll($data);
+        $this->entityManager->persist($i);
         
-        $d = new LuMicuLa_Model_LuMicuLa();
-        $d->modname = 'Wikula';
-        $d->language = 'Wikka';
-        $d->elements = array('bold' => true);
-        $d->save();
+        
+        $i = new LuMicuLa_Entity_LuMicuLa();
+        $data = array(
+            'modname'  => 'Wikula',
+            'language' => 'Wikka',
+            'elements' => array('bold' => true)
+        );
+        $i->setAll($data);
+        $this->entityManager->persist($i);
+        
+        $this->entityManager->flush();
 
         $this->setVar('syntaxHighlighters', 'syntaxhighlighter');
         $this->setVar('imageViewer', true);
@@ -83,7 +95,11 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
     */
     public function uninstall()
     {
-        DoctrineUtil::dropTable('lumicula');
+         // drop tables
+        DoctrineHelper::dropSchema($this->entityManager, array(
+            'LuMicuLa_Entity_LuMicuLa'
+        ));
+        
         // Delete any module variables
         $this->delVars();
         HookUtil::unregisterProviderBundles($this->version->getHookProviderBundles());

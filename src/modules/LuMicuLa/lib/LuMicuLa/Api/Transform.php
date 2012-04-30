@@ -261,7 +261,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         
         // get the light markup language of the current module
         if(!is_array($this->_lml) or !array_key_exists($modname, $this->_lml)) {
-            $editor_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->find($modname);
+            $editor_settings = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
             $editor_settings = $editor_settings->toArray();
             $this->_lml[$modname] = $editor_settings;
         }
@@ -583,7 +583,7 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             ));
             break;
          case 'wiki':
-            if( !ModUtil::apiFunc('Wikula', 'user', 'PageExists', array('tag' => $id)) )
+            if (!ModUtil::apiFunc('Wikula', 'user', 'PageExists', $id))
             {
                 $url = ModUtil::url('Wikula', 'user', 'edit', array('tag' => $id) );
                 $url   = str_replace("//", "LINKREPLACEMENT", $url);

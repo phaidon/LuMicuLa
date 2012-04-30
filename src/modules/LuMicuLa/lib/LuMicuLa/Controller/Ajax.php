@@ -20,9 +20,11 @@ class LuMicuLa_Controller_Ajax extends Zikula_AbstractController
         if(!SecurityUtil::checkPermission('LuMicuLa::', '::', ACCESS_DELETE) ){
             return;
         }
+        
         $modname = FormUtil::getPassedValue('id', -1, 'GET');
-        $d = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->find($modname);
-        $d->delete();
+        $d = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
+        $this->entityManager->remove($d);
+        $this->entityManager->flush();
     }
    
 }

@@ -51,8 +51,7 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
            $textfieldname = 'textfield';
         }
         
-        $editor_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')
-                           ->findOneBy('modname', $modname);
+        $editor_settings = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
         
         if(!$editor_settings) {
             return LogUtil::registerError(__("There are no LuMiCuLa settings for this module! Please contact the site admin to solve this problem!"));
@@ -101,6 +100,8 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
         $text = $hook->getData();
                 
         if($hook->getCaller() == 'WikulaSaver') {
+                        
+            
             $language = ModUtil::apiFunc('LuMicuLa', 'transform', 'getLanguage', 'Wikula');
             if($language == false) {
                 return false;

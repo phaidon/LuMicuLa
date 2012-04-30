@@ -87,24 +87,11 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
             throw new Zikula_Exception_Forbidden();
         }
     
-        $all_elements = ModUtil::apiFunc($this->name, 'user', 'elements');
-        $all_module_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->findAll();
-        $all_module_settings = $all_module_settings->toArray();
+        $allElements = ModUtil::apiFunc($this->name, 'user', 'elements');
+        $allModuleSettings = $this->entityManager->getRepository('LuMicuLa_Entity_LuMicuLa')->findAll();
         
-        // add all elements data icon, title, ...
-        foreach($all_module_settings as $key1 => $module_settings) {
-            $elements = array();
-            foreach( $module_settings['elements'] as $key2 => $active) {
-                if($active) {
-                    $elements[$key2] = $all_elements[$key2];
-                }
-            }
-            $all_module_settings[$key1]['elements'] = $elements;
-        }
-        
-        
-        
-        return $this->view->assign('mods', $all_module_settings)
+        return $this->view->assign('mods', $allModuleSettings)
+                          ->assign('elements', $allElements)
                           ->fetch('admin/modules.tpl');
        
      }

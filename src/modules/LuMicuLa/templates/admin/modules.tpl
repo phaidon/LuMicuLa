@@ -25,8 +25,10 @@
             <td>{$mod.modname|safetext}</td>
             <td>{$mod.language|safetext}</td>
             <td>
-                {foreach from=$mod.elements item='element'}
-                {img modname='LuMicuLa' src=$element.icon title=$element.title|safetext}
+                {foreach from=$mod.elements key='element' item='active'}
+                    {if $active}
+                        {img modname='LuMicuLa' src=$elements.$element.icon title=$elements.$element.title|safetext}
+                    {/if}
                 {/foreach}
             </td>
             <td class="z-right z-nowrap">

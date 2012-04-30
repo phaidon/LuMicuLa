@@ -13,7 +13,7 @@
 
 class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
 {
-    private $_modname;
+    private $moduleSettings;
 
 
     function initialize(Zikula_Form_View $view)
@@ -24,13 +24,10 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         if ($modname) {
             $view->assign('templatetitle', $this->__('Modify module settings').': '.$modname);
             $view->assign('create', false);
-            $module_settings = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')
-                              ->findOneBy('modname', $modname);
-            $module_settings = $module_settings->toArray();
-            if ($module_settings) {
-                $this->_modname = $modname;
-                $view->assign($module_settings);
-                $view->assign($module_settings['elements']);
+            $this->moduleSettings = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
+            if ($this->moduleSettings) {
+                $view->assign($this->moduleSettings->toArray());
+                $view->assign($this->moduleSettings->getElements());
                 
             } else {
                 return LogUtil::registerError($this->__f('Article with id %s not found', $id));
@@ -39,9 +36,9 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
             $view->assign('templatetitle', $this->__('Create module settings'));
             $view->assign('create', true);
             $all_moduls = ModUtil::getAllMods();
-            $lml_moduls = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->findAll();
-            $lml_moduls = $lml_moduls->toArray();
+            $lml_moduls = $this->entityManager->getRepository('LuMicuLa_Entity_LuMicuLa')->findAll();
             foreach($lml_moduls as $lml_module) {
+                $lml_module = $lml_module->toArray();
                 $modame = $lml_module['modname'];
                 if(array_key_exists($modame, $all_moduls)) {
                     unset($all_moduls[$modame]);
@@ -94,12 +91,10 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
 
         
         // switch between edit and create mode
-        if ($this->_modname) {
-            $d = Doctrine_Core::getTable('LuMicuLa_Model_LuMicuLa')->find($this->_modname);
-        } else {
+        if (!$this->moduleSettings) {
             $data['modname'] = $data0['modname'];
             unset($data0['modname']);
-            $d = new LuMicuLa_Model_LuMicuLa();
+            $this->moduleSettings = new LuMicuLa_Entity_LuMicuLa();
         }
         
         $data['language'] = $data0['language'];
@@ -108,8 +103,9 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         unset($data0['smilies']);
         $data['elements'] = $data0;        
         
-        $d->merge($data);
-        $d->save();
+        $this->moduleSettings->setAll($data);
+        $this->entityManager->persist($this->moduleSettings);
+        $this->entityManager->flush();
 
 
         LogUtil::registerStatus($this->__('Done! Configuration has been updated'));

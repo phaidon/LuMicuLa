@@ -319,7 +319,7 @@ class LuMicuLa_Api_Wikka extends Zikula_AbstractApi
     }
     
     
-    public function getPageLinks($text) {
+    public function getPageLinks($text = '') {
         $links = array();
         $pagelinks = array();
         preg_match_all("/\[\[(.*?)\]\]/", $text, $links);
