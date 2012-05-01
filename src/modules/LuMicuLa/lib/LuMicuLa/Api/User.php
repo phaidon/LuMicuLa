@@ -150,7 +150,12 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 'icon'         => 'superscript.png',
                 'title'        => $this->__('superscripted text'),
                 'inner'        => $this->__('superscripted text'),
-            ),  
+            ),
+            'blockquote'   => array(
+                'icon'         => 'superscript.png',
+                'title'        => $this->__('blockquote text'),
+                'inner'        => $this->__('blockquote text'),
+            ),
             'headings'      => array(
                 'icon'         => 'headings.png',
                 'title'        => $this->__('Headings'),

@@ -109,8 +109,12 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
             }
 
             $data = array();
-            $data['links']      = ModUtil::apiFunc('LuMicuLa', $language, 'getPageLinks', $text);
-            $data['categories'] = ModUtil::apiFunc('LuMicuLa', $language, 'getPageCategories', $text);
+            $args = array(
+                'text' => $text,
+                'language' => $language
+            );
+            $data['links']      = ModUtil::apiFunc('LuMicuLa', 'Transform', 'getPageLinks', $args);
+            $data['categories'] = ModUtil::apiFunc('LuMicuLa', 'Transform', 'getPageCategories', $args);
             $text = $data;
         } else {
             $text = ModUtil::apiFunc('LuMicuLa', 'transform', 'transform', array(

@@ -58,9 +58,10 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         } 
         
         $lmls = array(
-            array('value' => 'BBCode', 'text' => 'BBCode'),
-            array('value' => 'Creole', 'text' => 'Creole'),
-            array('value' => 'Wikka',  'text' => 'Wikka'),
+            array('value' => 'BBCode',   'text' => 'BBCode'),
+            array('value' => 'Creole',   'text' => 'Creole'),
+            array('value' => 'Markdown', 'text' => 'Markdown'),
+            array('value' => 'Wikka',    'text' => 'Wikka'),
         );
         $view->assign('lmls', $lmls);
         

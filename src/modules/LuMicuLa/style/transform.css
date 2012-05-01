@@ -31,3 +31,20 @@ div.lmlquoteheader {
     line-height: 1.6em;
     vertical-align: top;
 }
+
+a.externalLink {
+    background: url('../images/linkicon.png');
+    background-repeat: no-repeat;
+    background-position: right center;
+    padding-right:13px;
+}
+
+.lumicula blockquote {
+    border-left: 4px solid #DDD;
+    border-left-width: 4px;
+    border-left-style: solid;
+    border-left-color: #DDD;
+    padding: 0 15px;
+    margin-left: 10px;
+    color: #777;
+}

@@ -14,11 +14,9 @@
 
 class LuMicuLa_Api_Transform extends Zikula_AbstractApi 
 {
-
     
-    public function replaces()
-    {
-        return array(
+
+    private $replaces = array(
             'code' => array(
                 'begin'     => '<code>',
                 'end'       => '</code>',
@@ -32,16 +30,16 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'end'       => '</li>',
             ),
             'link' => array(
-                'begin'     => '<a>',
-                'end'       => '</a>',
+                'begin'     => '<a href="',
+                'end'       => '">VALUE</a>',
             ),
             'hr' => array(
                 'begin'     => '<hr />',
                 'end'       => '',
             ),
             'img' => array(
-                'begin'     => '<img src="..." title="..." alt="...">',
-                'end'       => '',
+                'begin'     => '<img src="',
+                'end'       => '">',
             ),
             'bold' => array(
                 'begin' => '<strong>',
@@ -64,12 +62,26 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'end'   => '</strong>',
             ),
             'table' => array(
-                'begin' => '<table><tr><td>',
-                'end'   => '</td></tr></table>',
+                'table' => array(
+                    'begin' => '<table border=1>',
+                    'end'   => '</table>',
+                ),
+                'tr' => array(
+                    'begin' => '<tr>',
+                    'end'   => '</tr>',
+                ),
+                'td' => array(
+                    'begin' => '<td>',
+                    'end'   => '</td>',
+                ),
             ),
             'monospace' => array(
                 'begin' => '<tt>',
                 'end'   => '</tt>',
+            ),
+            'blockquote' => array(
+                'begin' => '<blockquote>',
+                'end'   => '</blockquote>',
             ),
            'center' => array(
                 'begin' => '<center>',
@@ -107,28 +119,27 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'begin'      => '<sup>',
                 'end'        =>  '</sup>',
             ),
-            'headings' => array(
-                'h5' => array(
-                    'begin' => '<h6>',
-                    'end'   => '</h6>',
-                ),
-                'h4' => array(
-                    'begin' => '<h5>',
-                    'end'   => '</h5>',
-                ),
-                'h3' => array(
-                    'begin' => '<h4>',
-                    'end'   => '</h4>',
-                ),
-                'h2' => array(
-                    'begin' => '<h3>',
-                    'end'   => '</h3>',
-                ),
-                'h1' => array(
-                    'begin' => '<h2>',
-                    'end'   => '</h2>',
-                ),
-             ),
+            'headings' => null,
+            'h5' => array(
+                'begin' => '<h6>',
+                'end'   => '</h6>',
+            ),
+            'h4' => array(
+                'begin' => '<h5>',
+                'end'   => '</h5>',
+            ),
+            'h3' => array(
+                'begin' => '<h4>',
+                'end'   => '</h4>',
+            ),
+            'h2' => array(
+                'begin' => '<h3>',
+                'end'   => '</h3>',
+            ),
+            'h1' => array(
+                'begin' => '<h2>',
+                'end'   => '</h2>',
+            ),
             'youtube' => array(
                 'begin' => '<object width="640" height="390"></param><param name="allowScriptAccess" value="always"></param><embed src="https://www.youtube.com/v/',
                 'end'   => '?version=3&autoplay=1" type="application/x-shockwave-flash" allowscriptaccess="always" width="640" height="390"></embed></object>'
@@ -139,7 +150,6 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
                 'end'   => '" frameborder="0">'
             )*/
         );
-    }
     
     
    /**
@@ -153,12 +163,13 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     private $_codeblocks = array();
     private $_nomarkups  = array();
     private $categories  = array();
+    private $elements;
 
 
     
     public function transform($args)
     { 
-        
+                
         extract($args);
         if(empty($modname) or empty($text)) {
             return $text;
@@ -172,6 +183,9 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         $this->categories  = array();
         
         
+        $editor_settings = $this->_lml[$modname];
+        $lml = $editor_settings['language'];
+        $this->elements = ModUtil::apiFunc('LuMicuLa', $lml, 'elements');
         
         
         $message = ' ' . $text; // pad it with a space so we can distinguish 
@@ -180,14 +194,17 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         // bbencode_code() all depend on it.
         unset($text);
         
+                
         
-        $message = $this->extractCategories($message, $modname);
+        $message = $this->extractCategories($message);
         
+        $message = $this->transformAbandonedLinks($message);
         $message = $this->transform_quotes($message);
         $message = $this->replace($message, $modname);   
         $message = $this->transform_smilies($message);       
         
         
+        $message = str_replace("</blockquote><blockquote>", "\n", $message);
         $message = str_replace('<br>', '<br />', $message);
         $message = str_replace("<br />\n", "\n", $message);
         $message = str_replace("\n", "<br />\n", $message);
@@ -203,20 +220,106 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         
         // Remove our padding from the string..
         $message = substr($message, 1);
-        return $message;
+        return '<div class="lumicula">'.$message.'</div>';
 
     }
     
     
     
-    public function extractCategories($message, $modname)
+    private function transformAbandonedLinks($message) {
+        
+        return preg_replace(
+            "#([[:space:]](http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s[[:space:]])#ie",
+            "' <a href=\"$1\" class=\"externalLink\">$3</a>$4 '",
+            $message
+        );
+    }
+    
+    
+    
+    public function getPageLinks($args) {
+        
+        if (empty($args['text']) || empty($args['language'])) {
+            return array();
+        }
+        
+        
+        $elements = ModUtil::apiFunc('LuMicuLa', $args['language'], 'elements');
+        if (!array_key_exists('page', $elements)) {
+            return array();
+        } 
+        
+        $begin = preg_quote($elements['page']['begin'],'/');
+        $begin = str_replace("BOL", "^", $begin);
+        $end   = preg_quote($elements['page']['end'],  '/');
+                        
+        $links = array();
+        $pagelinks = array();
+        preg_match_all("/".$begin."(.*?)".$end."/", $args['text'], $links);
+        $links = $links[1];
+        foreach($links as $link) {
+            $link = explode(' ', $link);
+            // check if link is a hyperlink
+            if( strstr($link[0], '://' ) or strstr($link[0], '@' ) ) {
+                continue;
+            }
+            $pagelinks[] = $link[0];                 
+        }
+       return array_unique($pagelinks);
+    }
+    
+    
+    public function getPageCategories($args) {
+        
+        if (empty($args['text']) || empty($args['language'])) {
+            return array();
+        }
+        
+        
+        $elements = ModUtil::apiFunc('LuMicuLa', $args['language'], 'elements');
+        if (!array_key_exists('category', $elements)) {
+            return array();
+        } 
+        
+        $begin = preg_quote($elements['category']['begin'],'/');
+        $begin = str_replace("BOL", "^", $begin);
+        $end   = preg_quote($elements['category']['end'],  '/');
+        
+        
+        
+        $categories = array();
+        preg_match_all("/".$begin."([a-zA-Z0-9]*+)".$end."/", $args['text'], $categories);
+        $categories = $categories[1];
+        
+        foreach($categories as $key => $value) {
+            $value = explode(' ', $value);
+            $value = $value[0];
+            $categories[$key] = $value;
+        }
+        return array_unique($categories);
+    }
+    
+    
+    public function extractCategories($message)
     {
         
-        $editor_settings = $this->_lml[$modname];
-        $lml = $editor_settings['language'];
-        return ModUtil::apiFunc($this->name, $lml, 'extractCategories', $message );
+        if (!array_key_exists('category', $this->elements)) {
+            return $message;
+        } 
+        
+        $begin = preg_quote($this->elements['category']['begin'],'/');
+        $begin = str_replace("BOL", "^", $begin);
+        $end   = preg_quote($this->elements['category']['end'],  '/');
+        
+        $message = preg_replace_callback(
+            "#\n".$begin."([a-zA-Z0-9]*+)".$end."#si",
+            array($this, 'categoryCallback'),
+            $message
+        );
+        return $message;
         
     }
+    
     
     
     public function categoryCallback($things)
@@ -231,21 +334,17 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             'category',
             array('category' => $category)
         );
-        ModUtil::apiFunc('LumiCuLa', 'Transform', 'addCategory', '<a href="'.$url.'">'.$title.'</a>');
+        $this->categories[] = '<a href="'.$url.'">'.$title.'</a>';
         
     }
 
-    
-    public function addCategory($category)
-    {
-        $this->categories[] = $category;
-    }
     
     
     
     private function categoriesBox()
     {   
-        
+        $this->categories = array_unique($this->categories);
+        asort($this->categories);
         if( count($this->categories) > 0) {
             if( count($this->categories) == 1 ) {
                 $categories = $this->__('Category');
@@ -282,53 +381,70 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
         }
         $lml = $editor_settings['language'];
         
+                
         
-        $replaces = $this->replaces();
-        // transform other elements (bold, italic, , ...)
-        $elements = ModUtil::apiFunc($this->name, 'user', 'elements', $editor_settings);
-        
-        
-        $message = $this->replace2($message, $elements, $replaces, $lml);
+        $message = $this->replace2($message, $this->elements, $lml);
         
         return $message;
         
     }
     
     
-    protected function replace2($message, $elements, $replaces, $lml)
+    private function replace2($message, $elements, $lml)
     {
+        
+        
         foreach($elements as $tagID => $tagData) {
-            if(!array_key_exists($tagID, $replaces)) {
+            
+            
+            if(!array_key_exists($tagID, $this->replaces) || $tagID == 'categoty') {
                 continue;
             }
+            $replaceData = $this->replaces[$tagID];
             
-            $replaceData = $replaces[$tagID];
-
-            $func = null; $subitems = null;
-            extract($tagData);// begin, end, func
-
             
-            if(!is_null($func) and $func) {
+            if(isset($tagData['func']) and $tagData['func']) {
                 $message = $this->transform_func($message, $tagID, $tagData, $lml);  
-            } else if (!is_null($subitems) ) {
-                foreach($subitems as $key => $value) {
-                    $message = $this->replace2($message, $subitems, $replaceData, $lml);
-                }
+            } else if (isset($tagData['subitems']) ) {
+                $message = $this->replace2($message, $tagData['subitems'], $lml);
             } else {
-                if(substr_count($begin, 'VALUE') > 0) {
+                
+                if(substr_count($tagData['begin'], 'VALUE') > 0) {
                     $message = $this->transform_multi($message,$tagID, $tagData, $replaceData);
                 }
                 
-                $begin = preg_quote($begin,'/');
-                $begin = str_replace("BOL", "^", $begin);
-                $end   = preg_quote($end,  '/');
-                $message = preg_replace(
-                    "/".$begin."(.*?)".$end."/si",
-                    $replaceData['begin']."\\1".$replaceData['end'],
-                    $message
-                );
+                if (!isset($tagData['pattern'])) {
+                    $tagData['begin']   = preg_quote($tagData['begin'],'/');
+                    $tagData['begin']   = str_replace("BOL", "^", $tagData['begin']);
+                    $tagData['end']     = preg_quote($tagData['end'],  '/');
+                    $tagData['pattern'] = "/".$tagData['begin']."(.*?)".$tagData['end']."/si";
+                }
+                            
+                if (isset($tagData['callback'])) {
+                    $message = preg_replace_callback(
+                        $tagData['pattern'],
+                        array($this, $tagData['callback'].'_callback'),
+                        $message
+                    );
+                } else {
+                    $message = preg_replace(
+                        $tagData['pattern'],
+                        $replaceData['begin']."\\1".$replaceData['end'],
+                        $message
+                    );
+                }
+                
             }
+            
+            
+            if (isset($tagData['alternatives']) ) {
+                foreach($tagData['alternatives'] as $value) {
+                    $message = $this->replace2($message, array($tagID => $value), $lml, true);
+                }
+            }
+            
         }
+        
         return $message;
     }
     
@@ -497,35 +613,34 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     public function transform_image($image)
     {    
 
-        extract($image);        
-        $src = str_replace("//", "LINKREPLACEMENT", $src);
+        $image['src'] = str_replace("//", "LINKREPLACEMENT", $image['src']);
 
        
-        if(empty($title)) {
+        if(empty($iamge['title'])) {
             return '<a href="'.$src.'" rel="imageviewer">'.
                    '<img src="'.$src.'" width="250" />'.
                    '</a>';
         }        
         return '<a href="'.$src.'" rel="imageviewer">'.
-               '<img src="'.$src.'" title="'.$title.'" alt="'.$title.'" width="250" />'.
+               '<img src="'.$image['src'].'" title="'.$image['title'].'" alt="'.$image['title'].'" width="250" />'.
                '</a>';
     }
+    
+    
+    
+    private function transform_link($url, $title = null)
+    {    
 
-    public function transform_link($link)
-    {
+        if (empty($title)) {
+            $title = $url;
+        } 
         
-        if(empty($link['title'])) {
-            $link['title'] = null;
-        }
-        
-        $url = $link['url'];
-        $title = $link['title'];
         $mailto = substr($url, 0, 6) == 'mailto';
         
-        
+                
         $pos = strpos($url, '://');
         if( $pos === false and !$mailto) {
-            return $this->transform_page($url, $title);
+            return self::transform_page($url, $title);
         }
         
         $url = str_replace("//", "LINKREPLACEMENT", $url);
@@ -538,23 +653,29 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             }
         }
         return '<a href="'.DataUtil::formatForDisplay($url).'">'.DataUtil::formatForDisplay($title).'</a>';
-        
+    }
+
+    
+    public function link1_callback($matches)
+    {        
+        if (empty($matches[1])) {
+            $url   = $matches[2];
+            $title = $matches[2];
+        } else {
+            $url   = $matches[1];
+            $title = $matches[2];
+        }
+        return $this->transform_link($url, $title);
     }
     
-    public static function link_callback($matches)
+    
+     public function link2_callback($matches)
     {        
-        $link = array();
-        
-        if (empty($matches[1])) {
-            $link['url']   = $matches[2];
-            $link['title'] = null;
-        } else {
-            $link['url']   = $matches[1];
-            $link['title'] = $matches[2];
-        }
-
-        return self::transform_link($link);
+        $url   = $matches[2];
+        $title = $matches[1];
+        return $this->transform_link($url, $title);
     }
+
 
     protected function transform_page($tag, $title)
     {
@@ -702,8 +823,6 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
             return false;
         }
         return $editor_settings['language'];
-    
     }
-    
     
 }
