@@ -38,75 +38,82 @@ class LuMicuLa_Language_Creole extends LuMicuLa_Language_Common
                 'func'  => true,
             ),
             'img' => array(
-                'begin' => '{{',
-                'inner' => 'http://www.example.com/image.png',
-                'end'   => '}}',
-                'func'  => true
+                'begin'     => '{{',
+                'inner'     => 'http://www.example.com/image.png',
+                'end'       => '}}',
+                'func'      => true
             ),
             'youtube' => array(
-                'begin' => '<<youtube id=',
-                'end'   => '>>',
+                'begin'     => '<<youtube id=',
+                'end'       => '>>',
             ),
             'indent' => array(
-                'begin' => ":",
-                'end'   => "\n",
-                'pattern' => '/^\:(.*?)\n/mi',
+                'begin'     => ":",
+                'end'       => "\n",
+                'pattern'   => '/^\:(.*?)\n/mi',
+                
+            ), 
+            'table' => array(
+                'begin'     => "table",
+                'end'       => "table",
+                'pattern'   => '/\n\|(.*?)\|\n\n/si',
+                'func'      => true
                 
             ), 
             'hr' => array(
-                'begin' => '----',
-                'end'   => '',
+                'begin'     => '----',
+                'end'       => '',
             ),
             'list' => array(
-                'begin' => '^\* ',
-                'end'   => '\n$',
-                'inner' => '',
-                'func'  => true,
-                'regexp'=> true // preg_quote
+                'begin'     => '^\* ',
+                'end'       => '\n$',
+                'inner'     => '',
+                'func'      => true,
+                'regexp'    => true // preg_quote
             ),
             'link' => array(
-                'begin' => '[[',
-                'inner' => __('http://www.example.com').'|'.__('Url Title'),
-                'end'   => ']]',
-                'func'  => true,
+                'begin'     => '[[',
+                'inner'     => __('http://www.example.com').'|'.__('Url Title'),
+                'end'       => ']]',
+                'func'      => true,
             ),
             'page' => array(
-                'begin' => '[[',
-                'inner' => __('Page').'|'.__('Page Title'),
-                'end'   => ']]',
+                'begin'     => '[[',
+                'inner'     => __('Page').'|'.__('Page Title'),
+                'end'       => ']]',
                 'noreplace' => true
             ),
             'bold' => array(
-                'begin' => '**',
-                'end'   => '**',
+                'begin'     => '**',
+                'end'       => '**',
             ),
             'italic' => array(
-                'begin' => '//',
-                'end'   => '//',
+                'begin'     => '//',
+                'end'       => '//',
             ),
             'underline' => array(
-                'begin' => '__',
-                'end'   => '__',
+                'begin'     => '__',
+                'end'       => '__',
             ),
             'strikethrough' => array(
-                'begin' => '--',
-                'end'   => '--',
+                'begin'     => '--',
+                'end'       => '--',
             ),
             'mark' => array(
-                'begin' => '++',
-                'end'   => '++',
+                'begin'     => '++',
+                'end'       => '++',
             ),
             'monospace' => array(
-                'begin' => "##",
-                'end'   => "##",
+                'begin'     => "##",
+                'end'       => "##",
             ),
             'key' => array(
-                'begin' => "#%",
-                'end'   => "#%",
+                'begin'     => "#%",
+                'end'       => "#%",
             ),
            'subscript'   => array(
-                'begin'      => ',,',
-                'end'        =>  ',,',
+                'begin'     => ',,',
+                'end'       =>  ',,',
             ),
             'superscript'=> array(
                 'begin'      => '^^',
@@ -145,24 +152,20 @@ class LuMicuLa_Language_Creole extends LuMicuLa_Language_Common
     
     
     
-    public static function img_callback($matches)
+    public function img_callback($matches)
     {
         $array = explode("|", $matches[1]);
-        $image['src']   = $array[0];
-        
-        if(count($array) == 2) {
-            $image['title'] = $array[1];
+        $src   = $array[0];
+        if (isset($array[1])) {
+            $title = $array[1];
+        } else {
+            $title = $src;
         }
-        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_image', $image);
-    }
-    
-    public static function code_callback($matches)
-    {
-        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_code', $matches[1]);
+        return $this->image($src, $title);
     }
     
     
-    public static function list_callback($matches)
+    public function list_callback($matches)
     {        
         $prevLevel = 0;
         $result = '';
@@ -199,60 +202,33 @@ class LuMicuLa_Language_Creole extends LuMicuLa_Language_Common
  
         if(count($array) > 1) {
             $title = $array[1];
+        } else {
+            $title = $url;
         }
         return $this->link($url, $title);
     }
     
-    
-    /*public function extractCategories($message)
-    {
-        
-        $message = preg_replace_callback(
-            "#\n\[\[Category(.*?)\]\]#si",
-            array('LuMicuLa_Api_Transform', 'categoryCallback'),
-            $message
-        );
-        $message = preg_replace_callback(
-            "#\nCategory([a-zA-Z0-9]*+)#si",
-            array(LuMicuLa_Api_Transform, 'categoryCallback'),
-            $message
-        );
-        return $message;
-    }*/
-    
-    
-    /*public function getPageCategories($text) {
-        $categories = array();        
-        preg_match_all("/\n\[\[Category(.*?)\]\]/", $text, $categories);
-        $categories = $categories[1];
-        $categories2 = array();        
-        preg_match_all("/\nCategory([a-zA-Z0-9]*+)/", $text, $categories2);
-        $categories2 = $categories2[1];
-        $categories = array_merge($categories, $categories2);
-        
-        foreach($categories as $key => $value) {
-            $value = explode(' ', $value);
-            $value = $value[0];
-            $categories[$key] = $value;
+    public function table_callback($matches)
+    {        
+        $rows = explode("\n", '|'.$matches[1].'|');
+        $inner = "\n<table border=1>";
+        foreach($rows as $row) {
+            $inner .= '<tr>';
+            $cells = explode("|", $row);
+            for($i = 1; $i < count($cells)-1; $i++) {
+                $cell = str_replace('\\', "\n", $cells[$i]);
+                if (substr($cell, 0, 1) == '=') {
+                    $inner .= '<th>'.substr($cell, 1).'</th>';
+                } else {
+                    $inner .= '<td>'.$cell.'</td>';
+                }
+            }
+            $inner .= '</tr>';
         }
-        return array_unique($categories);
+        
+        $inner .= "</table>\n";
+        return $inner;
     }
     
-    
-    public function getPageLinks($text) {
-        $links = array();
-        $pagelinks = array();
-        preg_match_all("/\[\[(.*?)\]\]/", $text, $links);
-        $links = $links[1];
-        foreach($links as $link) {
-            $link = explode('|', $link);
-            // check if link is a hyperlink
-            if( strstr($link[0], '://' ) or strstr($link[0], '@' ) ) {
-                continue;
-            }
-            $pagelinks[] = $link[0];                 
-        }
-        return array_unique($pagelinks);
-    }*/
-    
+   
 }

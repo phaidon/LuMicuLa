@@ -23,7 +23,8 @@ class LuMicuLa_Language_Common extends Zikula_AbstractBase
             $c = count($this->protected);
             $this->protected[$c] = $src;
             $src = 'PROTECTED'.$c;
-            $this->protected[$c+1] = $title;
+            $c++;
+            $this->protected[$c] = $title;
             $title = 'PROTECTED'.$c;
         }
         
