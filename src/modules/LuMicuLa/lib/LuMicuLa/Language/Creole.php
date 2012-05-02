@@ -12,15 +12,22 @@
  * information regarding copyright and licensing.
  */
 
-class LuMicuLa_Api_Creole extends Zikula_AbstractApi 
+class LuMicuLa_Language_Creole extends LuMicuLa_Language_Common 
 {
     
+    
+    public function __construct()
+    {
+        $this->protect = true;
+    }
+    
+    
     /**
-    * Creole elements
-    *
-    * @see http://www.wikicreole.org/
-    * @return list of Creole elements
-    */    
+     * Creole elements
+     *
+     * @see http://www.wikicreole.org/
+     * @return list of Creole elements
+     */    
     
     public function elements()
     {
@@ -51,16 +58,17 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
                 'func'  => true,
                 'regexp'=> true // preg_quote
             ),
-           'page' => array(
-                'begin' => '[[',
-                'inner' => $this->__('Page').'|'.$this->__('Page Title'),
-                'end'   => ']]',
-            ),
             'link' => array(
                 'begin' => '[[',
-                'inner' => $this->__('http://www.example.com').'|'.$this->__('Url Title'),
+                'inner' => __('http://www.example.com').'|'.__('Url Title'),
                 'end'   => ']]',
                 'func'  => true,
+            ),
+            'page' => array(
+                'begin' => '[[',
+                'inner' => __('Page').'|'.__('Page Title'),
+                'end'   => ']]',
+                'noreplace' => true
             ),
             'bold' => array(
                 'begin' => '**',
@@ -178,19 +186,19 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
     }
     
     
-    public static function link_callback($matches)
+    public function link_callback($matches)
     {        
         $array = explode("|", $matches[1]);
-        $link['url'] = $array[0];
+        $url = $array[0];
  
         if(count($array) > 1) {
-            $link['title'] = $array[1];
+            $title = $array[1];
         }
-        return ModUtil::apiFunc('LuMicuLa', 'transform', 'transform_link', $link);
+        return $this->link($url, $title);
     }
     
     
-    public function extractCategories($message)
+    /*public function extractCategories($message)
     {
         
         $message = preg_replace_callback(
@@ -204,10 +212,10 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
             $message
         );
         return $message;
-    }
+    }*/
     
     
-    public function getPageCategories($text) {
+    /*public function getPageCategories($text) {
         $categories = array();        
         preg_match_all("/\n\[\[Category(.*?)\]\]/", $text, $categories);
         $categories = $categories[1];
@@ -239,6 +247,6 @@ class LuMicuLa_Api_Creole extends Zikula_AbstractApi
             $pagelinks[] = $link[0];                 
         }
         return array_unique($pagelinks);
-    }
+    }*/
     
 }

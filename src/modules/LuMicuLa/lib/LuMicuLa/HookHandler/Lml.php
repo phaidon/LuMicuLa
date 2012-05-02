@@ -101,17 +101,14 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
         
         $text = $hook->getData();
                 
+        
+        
         if($hook->getCaller() == 'WikulaSaver') {
-                        
-            $language = ModUtil::apiFunc('LuMicuLa', 'transform', 'getLanguage', 'Wikula');
-            if($language == false) {
-                return false;
-            }
 
             $data = array();
             $args = array(
                 'text' => $text,
-                'language' => $language
+                'modname' => 'Wikula'
             );
             $data['links']      = ModUtil::apiFunc('LuMicuLa', 'Transform', 'getPageLinks', $args);
             $data['categories'] = ModUtil::apiFunc('LuMicuLa', 'Transform', 'getPageCategories', $args);

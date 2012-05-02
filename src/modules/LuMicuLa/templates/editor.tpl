@@ -2,13 +2,15 @@
 {pageaddvar name="javascript" value="modules/LuMicuLa/javascript/editor.js"}
 {pageaddvar name="stylesheet" value="modules/LuMicuLa/style/editor.css"}
 
+
+
 <div id='lumicula_editor' style="margin-bottom:-4px">
     <div class="lumicula_editor_bar" id="lumicula_editor_bar">
         {foreach from=$items item="item"}
             {if !array_key_exists('subitems', $item)}
-                {assign var='begin' value=$item.begin|safetext}
-                {assign var='inner' value=$item.inner|safetext}
-                {assign var='end'   value=$item.end|safetext}
+                {assign var='begin' value=$item.begin|safetext|escapeItem}
+                {assign var='inner' value=$item.inner|safetext|escapeItem}
+                {assign var='end'   value=$item.end|safetext|escapeItem}
                 {assign var='title' value=$item.title|safetext}
                 {assign var='textfieldname' value=$textfieldname|safetext}
                 {gt assign='ctrl' text='ctrl'}
@@ -23,7 +25,7 @@
                     </script>
                     {assign var='title' value="$title ($ctrl+$shortcut)"}
                 {/if}
-
+                
                 {img modname='LuMicuLa' src=$item.icon|safetext title=$title|safetext onclick="insertAtCursor('$textfieldname', '$begin', '$inner', '$end');return false"}
             {else}
                 <select style="height:22px; vertical-align:middle; margin-top:-15px" onchange="insertAtCursor2({$textfieldname}, this.value);this.selectedIndex=0;return false">

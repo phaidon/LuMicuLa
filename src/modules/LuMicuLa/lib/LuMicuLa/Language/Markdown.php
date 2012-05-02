@@ -11,14 +11,14 @@
  * information regarding copyright and licensing.
  */
 
-class LuMicuLa_Api_BBCode extends Zikula_AbstractApi 
+class LuMicuLa_Language_Markdown extends LuMicuLa_Language_Common
 {
     
     /**
-     * BBCode elements
+     * Markdown elements
      *
-     * @see http://www.bbcode.org/reference.php
-     * @return list of BBCode elements
+     * @see http://en.wikipedia.org/wiki/Markdown
+     * @return list of Markdown elements
      */ 
     
     
@@ -26,56 +26,71 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
         
         // define elements
         return array(
-            'code' => array(
+            /*'code' => array(
                 'begin' => '[code]',
                 'end'   => '[/code]',
                 'func'  => true,
                 'gfunc' => true // general func
-            ),
+            ),*/
             'img' => array(
-                'begin' => '[img]',
+                'begin' => '!['.__('Title').'](',
                 'inner' => 'http://www.example.com/image.png',
-                'end'   => '[/img]',
+                'end'   => ')',
+                'pattern' => '/\!\[([^\[]*)\]\((.*?)\)/si',
+                'func' => true
             ),
-           'page' => array(
+           /*'page' => array(
                 'begin' => '[url]',
                 'inner' => $this->__('Page'),
                 'end'   => '[/url]',
-            ),
+            ),*/
             'link' => array(
-                'begin' => '[url]',
-                'inner' => $this->__('http://www.example.com'),
-                'end'   => '[/url]',
-                'pattern' => '/\[url=?(.*?)\](.*?)\[\/url\]/si',
-                'callback' => 'link1'
+                'begin' => '['.__('Title').'](',
+                'inner' => __('http://www.example.com'),
+                'end'   => ')',
+                'pattern' => '/\[([^\[]*)\]\((.*?)\)/si',
+                'func' => true
+
             ),
-            'list' => array(
+            /*'list' => array(
                 'begin' => '[list] [*]',
                 'end'   => '[/list]',
                 'func'  => '[list]VALUE[/list]',
-            ),
+            ),*/
             'bold' => array(
-                'begin' => '[b]',
-                'end'   => '[/b]',
+                'begin' => '**',
+                'end'   => '**',
+                'alternatives' => array(
+                    array(
+                        'begin' => '__',
+                        'end'   => '__',
+                    ),
+                 ),
             ),
             'italic' => array(
-                'begin' => '[i]',
-                'end'   => '[/i]',
+                'begin' => '*',
+                'end'   => '*',
+                'alternatives' => array(
+                    array(
+                        'begin' => '_',
+                        'end'   => '_',
+                    ),
+                 ),
             ),
-            'underline' => array(
+            /*'underline' => array(
                 'begin' => '[u]',
                 'end'   => '[/u]',
             ),
             'strikethrough' => array(
                 'begin' => '[s]',
                 'end'   => '[/s]',
-            ),
+            ),*/
             'hr' => array(
-                'begin' => '[hr]',
+                'begin' => '* * *',
                 'inner' => '',
                 'end'   => '',
             ),
-            'mark' => array(
+            /*'mark' => array(
                 'begin' => '[mark]',
                 'end'   => '[/mark]',
             ),
@@ -121,41 +136,85 @@ class LuMicuLa_Api_BBCode extends Zikula_AbstractApi
             'superscript'=> array(
                 'begin' => '[sup]',
                 'end'   => '[/sup]',
-            ),
+            ),*/
             'headings'  => array(
                 'subitems' => array(
                     'h5' => array(
-                        'begin' => '[h5]',
-                        'end'   => '[/h5]',
+                        'begin' => '#####',
+                        'end'   => "\n",
                     ),
                     'h4' => array(
-                        'begin' => '[h4]',
-                        'end'   => '[/h4]',
+                        'begin' => '#### ',
+                        'end'   => "\n",
                     ),
                     'h3' => array(
-                        'begin' => '[h3]',
-                        'end'   => '[/h3]',
+                        'begin' => '### ',
+                        'end'   => "\n",
                     ),
                     'h2' => array(
-                        'begin' => '[h2]',
-                        'end'   => '[/h2]',
+                        'begin' => '## ',
+                        'end'   => "\n",
                     ),
                     'h1' => array(
-                        'begin' => '[h1]',
-                        'end'   => '[/h1]',
+                        'begin' => '# ',
+                        'end'   => "\n",
                     ),
                  ),
              ),
-            'monospace' => array(
+            'blockquote' => array(
+                'begin' => ">",
+                'end'   => "\n",
+                'pattern' => '/^>(.*?)\n/mi',
+                
+            ),            
+            /*'monospace' => array(
                 'begin' => '[monospace]',
                 'end'   => '[/monospace]',
             ),
             'key' => array(
                 'begin' => "[key]",
                 'end'   => "[/key]",
-            ),
+            ),*/
         );
     }
+    
+    
+    public function replaceByFunc($tag, $text) {
+            
+        $elements = $this->elements();    
+            
+        if(!isset($elements[$tag]['pattern'])) {
+            $pattern = "#".$elements[$tag]['begin']."(.*?)".$elements[$tag]['end']."#si";
+        } else {
+            $pattern = $elements[$tag]['pattern'];
+        }
+    
+    
+        return preg_replace_callback(
+            $pattern,
+            array($this, $tag.'_callback'),
+            $text
+        );
+    }
+    
+    
+    public function link_callback($matches)
+    {        
+        $url   = $matches[2];
+        $title = $matches[1];
+        return $this->link($url, $title);
+        
+    }
+    
+    
+    public function img_callback($matches)
+    {        
+        $src   = $matches[2];
+        $title = $matches[1];
+        return $this->image($src, $title);
+        
+    }
+    
     
     public static function list_callback($matches)
     {   

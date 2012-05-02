@@ -185,23 +185,13 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         );
                 
         if(count($editor_settings) > 0) {
-            switch ($editor_settings['language']) {
-                case 'Wikka':
-                    $lmlElements = ModUtil::apiFunc($this->name, 'Wikka',  'elements');
-                    break;
-                case 'BBCode':
-                    $lmlElements = ModUtil::apiFunc($this->name, 'BBCode', 'elements');
-                    break;
-                case 'BBCode':
-                    $lmlElements = ModUtil::apiFunc($this->name, 'BBCode', 'elements');
-                    break;
-                case 'Creole':
-                    $lmlElements = ModUtil::apiFunc($this->name, 'Creole', 'elements');
-                    break;
-                default:
-                    return $elements;
-            }
             
+            $language = $editor_settings['language'];
+            $className = "LuMicuLa_Language_".$language;    
+            $this->languageClass = new $className;
+            $lmlElements = $this->languageClass->elements();
+            
+
             $elements0 = $editor_settings['elements'];
             foreach($elements0 as $element => $value) {
                 if($value and array_key_exists($element, $elements) and array_key_exists($element, $lmlElements)) {
@@ -274,5 +264,13 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         }
         return $tags;
     }
+    
+    
+    public function getElements($language) {
+        $languageClass = new LuMicuLa_Language_Markdown();
+        return $languageClass->elements();
+    }
+    
+    
     
 }
