@@ -40,11 +40,11 @@ class LuMicuLa_Language_Wikimedia extends LuMicuLa_Language_Common
                 'begin' => '<code>',
                 'end'   => '</code>',
             ),
-            /*'img' => array(
-                'begin' => '[img]',
+            'img' => array(
+                'begin' => '[[File:',
                 'inner' => 'http://www.example.com/image.png',
-                'end'   => '[/img]',
-            ),*/
+                'end'   => ']]',
+            ),
             'page' => array(
                 'begin' => '[[',
                 'inner' => __('Page'),
@@ -124,6 +124,12 @@ class LuMicuLa_Language_Wikimedia extends LuMicuLa_Language_Common
                 'begin' => '[youtube]',
                 'end'   => '[/youtube]',
             ),*/
+            'indent' => array(
+                'begin' => ":",
+                'end'   => "\n",
+                'pattern' => '/^\:(.*?)\n/mi',
+                
+            ), 
             'subscript'   => array(
                 'begin' => '<sub>',
                 'end'   => '</sub>',
@@ -155,11 +161,7 @@ class LuMicuLa_Language_Wikimedia extends LuMicuLa_Language_Common
                         'end'   => '==',
                     ),
                  ),
-             ),
-            'blockquote' => array(
-                'begin' => '<blockquote>',
-                'end'   => '</blockquote>',
-            ),            
+             ),            
             'monospace' => array(
                 'begin' => '<monospace>',
                 'end'   => '</monospace>',

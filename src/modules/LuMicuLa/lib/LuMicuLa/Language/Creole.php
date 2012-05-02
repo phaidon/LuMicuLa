@@ -47,6 +47,12 @@ class LuMicuLa_Language_Creole extends LuMicuLa_Language_Common
                 'begin' => '<<youtube id=',
                 'end'   => '>>',
             ),
+            'indent' => array(
+                'begin' => ":",
+                'end'   => "\n",
+                'pattern' => '/^\:(.*?)\n/mi',
+                
+            ), 
             'hr' => array(
                 'begin' => '----',
                 'end'   => '',

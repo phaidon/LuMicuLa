@@ -14,142 +14,12 @@
 class LuMicuLa_Language_Parser
 {
     
-    private $replaces = array(
-            'code' => array(
-                'begin'     => '<code>',
-                'end'       => '</code>',
-            ),
-            'nomarkup' => array(
-                'begin'     => '<tt>',
-                'end'       => '</tt>',
-            ),
-            'list' => array(
-                'begin'     => '<li>',
-                'end'       => '</li>',
-            ),
-            'link' => array(
-                'begin'     => '<a href="',
-                'end'       => '">VALUE</a>',
-            ),
-            'page' => null,
-            'hr' => array(
-                'begin'     => '<hr />',
-                'end'       => '',
-            ),
-            'img' => array(
-                'begin'     => '<img src="',
-                'end'       => '">',
-            ),
-            'bold' => array(
-                'begin' => '<strong>',
-                'end'   => '</strong>',
-            ),
-            'italic' => array(
-                'begin' => '<em>',
-                'end'   => '</em>',
-            ),
-            'underline' => array(
-                'begin' => '<u>',
-                'end'   => '</u>',
-            ),
-            'strikethrough' => array(
-                'begin' => '<del>',
-                'end'   => '</del>',
-            ),
-            'mark' => array(
-                'begin' => '<strong style="background-color:#ffee33;">',
-                'end'   => '</strong>',
-            ),
-            'table' => array(
-                'table' => array(
-                    'begin' => '<table border=1>',
-                    'end'   => '</table>',
-                ),
-                'tr' => array(
-                    'begin' => '<tr>',
-                    'end'   => '</tr>',
-                ),
-                'td' => array(
-                    'begin' => '<td>',
-                    'end'   => '</td>',
-                ),
-            ),
-            'monospace' => array(
-                'begin' => '<tt>',
-                'end'   => '</tt>',
-            ),
-            'blockquote' => array(
-                'begin' => '<blockquote>',
-                'end'   => '</blockquote>',
-            ),
-           'center' => array(
-                'begin' => '<center>',
-                'end'   => '</center>',
-            ),
-            'size'  => array(
-                'begin' => '<span style="font-size:VALUE">',
-                'end'   => '</span>',
-             ),
-            'color'  => array(
-                'begin' => '<span style="color:VALUE">',
-                'end'   => '</span>',
-             ),            
-            'key' => array(
-                'begin' => '<kbd class="keys">',
-                'end'   => '</kbd>',
-            ),
-            'box' => array(
-                'begin' => '<div class="floatl">',
-                'end'   => '</div>',
-            ),
-            'clear' => array(
-                'begin' => '<div class="clear">&nbsp;</div>',
-                'end'   => '',
-            ),
-            'indent' => array(
-                'begin' => '<div class="indent">',
-                'end'   => '</div>',
-            ),
-           'subscript'   => array(
-                'begin'      => '<sub>',
-                'end'        =>  '</sub>',
-            ),
-            'superscript'=> array(
-                'begin'      => '<sup>',
-                'end'        =>  '</sup>',
-            ),
-            'headings' => null,
-            'h5' => array(
-                'begin' => '<h6>',
-                'end'   => '</h6>',
-            ),
-            'h4' => array(
-                'begin' => '<h5>',
-                'end'   => '</h5>',
-            ),
-            'h3' => array(
-                'begin' => '<h4>',
-                'end'   => '</h4>',
-            ),
-            'h2' => array(
-                'begin' => '<h3>',
-                'end'   => '</h3>',
-            ),
-            'h1' => array(
-                'begin' => '<h2>',
-                'end'   => '</h2>',
-            ),
-            'youtube' => array(
-                'begin' => '<object width="640" height="390"><param name="allowScriptAccess" value="always"></param><embed src="https://www.youtube.com/v/',
-                'end'   => '?version=3&autoplay=1" type="application/x-shockwave-flash" allowscriptaccess="always" width="640" height="390"></embed></object>'
-            )
-            // the iframe solution makes problem with the Dizkus edit/quote buttons
-            /*'youtube' => array(
-                'begin' => '<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/',
-                'end'   => '" frameborder="0">'
-            )*/
-        );
+    private $replaces;
     
+    
+    public function __construct() {
+        $this->replaces = ModUtil::apiFunc('LuMicuLa', 'user', 'getReplaces');
+    }
     
     
     // ---------------------------------------------------------------------- \\
@@ -285,6 +155,8 @@ class LuMicuLa_Language_Parser
                 $this->replaceByFunc($tagID, $tagData);  
             } else if (isset($tagData['subitems']) ) {
                 $this->replace($tagData['subitems']);
+            } else if (isset($tagData['items']) ) {
+                $this->replace($tagData['items']);
             } else {
                 
                 if(substr_count($tagData['begin'], 'VALUE') > 0) {

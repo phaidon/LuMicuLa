@@ -36,6 +36,10 @@ class LuMicuLa_Language_BBCode extends LuMicuLa_Language_Common
                 'begin' => '[code]',
                 'end'   => '[/code]',
             ),
+            'nomarkup' => array(
+                'begin' => '[noparse]',
+                'end'   => '[/noparse]',
+            ),
             'img' => array(
                 'begin' => '[img]',
                 'inner' => 'http://www.example.com/image.png',
@@ -57,6 +61,10 @@ class LuMicuLa_Language_BBCode extends LuMicuLa_Language_Common
                 'begin' => '[list] [*]',
                 'end'   => '[/list]',
                 'func'  => '[list]VALUE[/list]',
+            ),
+            'indent' => array(
+                'begin' => '[indent]',
+                'end'   => '[/indent]',
             ),
             'bold' => array(
                 'begin' => '[b]',
@@ -80,21 +88,23 @@ class LuMicuLa_Language_BBCode extends LuMicuLa_Language_Common
                 'end'   => '',
             ),
             'mark' => array(
-                'begin' => '[mark]',
-                'end'   => '[/mark]',
+                'begin' => '[highlight]',
+                'end'   => '[/highlight]',
             ),
             'center' => array(
                 'begin' => '[center]',
                 'end'   => '[/center]',
             ),
             'size' => array(
-                'begin' => '[size=VALUE]',
+                'begin' => '[size=+1]',
                 'end'   => '[/size]',
+                'pattern' => '/\[size=(.*?)\](.*?)\[\/size]/mi',
+                'func'  => true
             ),
             'table' => array(
                 'begin' => '[table][tr][td]',
                 'end'   => '[/td][/tr][/table]',
-                'subitems' => array(
+                'items' => array(
                     'table' => array(
                         'begin' => '[table]',
                         'end'   => '[/table]',
@@ -111,8 +121,10 @@ class LuMicuLa_Language_BBCode extends LuMicuLa_Language_Common
                 
             ),
             'color' => array(
-                'begin' => '[color=VALUE]',
+                'begin' => '[color=red]', 
                 'end'   => '[/color]',
+                'pattern' => '/\[color=(.*?)\](.*?)\[\/color\]/mi',
+                'func'  => true
             ),
             'youtube' => array(
                 'begin' => '[youtube]',
@@ -177,7 +189,21 @@ class LuMicuLa_Language_BBCode extends LuMicuLa_Language_Common
         
     }
     
-    public static function list_callback($matches)
+    
+    public function color_callback($matches)
+    {   
+        return $this->color($matches[1], $matches[2]);
+    }
+    
+    
+    public function size_callback($matches)
+    {   
+        return $this->size($matches[1], $matches[2]);
+    }
+    
+    
+    
+    public function list_callback($matches)
     {   
         $list = str_replace("\n", '', $matches[1]);
         $list = str_replace('<br>', '', $list);

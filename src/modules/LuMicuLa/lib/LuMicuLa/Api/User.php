@@ -151,11 +151,6 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                 'title'        => $this->__('superscripted text'),
                 'inner'        => $this->__('superscripted text'),
             ),
-            'blockquote'   => array(
-                'icon'         => 'superscript.png',
-                'title'        => $this->__('blockquote text'),
-                'inner'        => $this->__('blockquote text'),
-            ),
             'headings'      => array(
                 'icon'         => 'headings.png',
                 'title'        => $this->__('Headings'),
@@ -187,9 +182,7 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
         if(count($editor_settings) > 0) {
             
             $language = $editor_settings['language'];
-            $className = "LuMicuLa_Language_".$language;    
-            $this->languageClass = new $className;
-            $lmlElements = $this->languageClass->elements();
+            $lmlElements = $this->getElements($language);
             
 
             $elements0 = $editor_settings['elements'];
@@ -213,18 +206,17 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
     
    public function supportedTags()
    {    
-        $replaces = ModUtil::apiFunc($this->name, 'transform', 'replaces');
-        $tags     = ModUtil::apiFunc($this->name, 'user',      'elements');
+        $replaces = $this->getReplaces();
+        $tags     = $this->elements();
+                
         foreach($tags as $key => $value) {
 
-           $lmls = array('BBCode', 'Creole', 'Wikka');
+           $lmls = array('BBCode', 'Creole', 'Wikka', 'Wikimedia', 'Markdown');
             
            foreach($lmls as $lml) {
-               $lmlElements = ModUtil::apiFunc($this->name, $lml, 'elements'); 
+               $lmlElements = $this->getElements($lml); 
                if(array_key_exists($key, $lmlElements)) {
-                   if(array_key_exists('func', $lmlElements[$key]) and $lmlElements[$key]['func']) {
-                      $tags[$key]['lmls'][$lml] = '<em>'.$this->__('Function').'</em>';
-                   } else if(array_key_exists('subitems', $lmlElements[$key])) {
+                   if(array_key_exists('subitems', $lmlElements[$key])) {
                       $tags[$key]['lmls'][$lml] = '<em>'.$this->__('Super tag').'</em>';
                    } else {
                        $inner = '';
@@ -241,12 +233,12 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
                        $tags[$key]['lmls'][$lml] = $lmltag;
                    }
                } else {
-                   $tags[$key]['lmls'][$lml] = '<em>'.$this->__('Not available').'</em>';
+                   $tags[$key]['lmls'][$lml] = '<em style="background-color:red">'.$this->__('Not available').'</em>';
                }
            }
            
             $html = '';
-            if(array_key_exists($key, $replaces) and array_key_exists('begin', $replaces[$key]) ) {
+            if(array_key_exists($key, $replaces) && array_key_exists('begin', $replaces[$key]) ) {
                 if (array_key_exists('inner', $value)) {
                    $inner = $value['inner'];
                 } else {
@@ -267,8 +259,143 @@ class LuMicuLa_Api_User extends Zikula_AbstractApi
     
     
     public function getElements($language) {
-        $languageClass = new LuMicuLa_Language_Markdown();
+        $className = 'LuMicuLa_Language_'.$language;
+        $languageClass = new $className;
         return $languageClass->elements();
+    }
+    
+    
+    public function getReplaces(){
+        return array(
+            'code' => array(
+                'begin'     => '<code>',
+                'end'       => '</code>',
+            ),
+            'nomarkup' => array(
+                'begin'     => '<tt>',
+                'end'       => '</tt>',
+            ),
+            'list' => array(
+                'begin'     => '<li>',
+                'end'       => '</li>',
+            ),
+            'link' => array(
+                'begin'     => '<a href="',
+                'end'       => '">VALUE</a>',
+            ),
+            'page' => null,
+            'hr' => array(
+                'begin'     => '<hr />',
+                'end'       => '',
+            ),
+            'img' => array(
+                'begin'     => '<img src="',
+                'end'       => '">',
+            ),
+            'bold' => array(
+                'begin' => '<strong>',
+                'end'   => '</strong>',
+            ),
+            'italic' => array(
+                'begin' => '<em>',
+                'end'   => '</em>',
+            ),
+            'underline' => array(
+                'begin' => '<u>',
+                'end'   => '</u>',
+            ),
+            'strikethrough' => array(
+                'begin' => '<del>',
+                'end'   => '</del>',
+            ),
+            'mark' => array(
+                'begin' => '<strong style="background-color:#ffee33;">',
+                'end'   => '</strong>',
+            ),
+            'table' => array(
+                'begin' => '<table border=1>',
+                'end'   => '</table>',
+            ),
+            'tr' => array(
+                'begin' => '<tr>',
+                'end'   => '</tr>',
+            ),
+            'td' => array(
+                'begin' => '<td>',
+                'end'   => '</td>',
+            ),
+            'monospace' => array(
+                'begin' => '<tt>',
+                'end'   => '</tt>',
+            ),
+           'center' => array(
+                'begin' => '<center>',
+                'end'   => '</center>',
+            ),
+            'size'  => array(
+                'begin' => '<span style="font-size:VALUE">',
+                'end'   => '</span>',
+             ),
+            'color'  => array(
+                'begin' => '<span style="color:VALUE">',
+                'end'   => '</span>',
+             ),            
+            'key' => array(
+                'begin' => '<kbd class="keys">',
+                'end'   => '</kbd>',
+            ),
+            'box' => array(
+                'begin' => '<div class="floatl">',
+                'end'   => '</div>',
+            ),
+            'clear' => array(
+                'begin' => '<div class="clear">&nbsp;</div>',
+                'end'   => '',
+            ),
+            'indent' => array(
+                'begin' => '<div class="indent">',
+                'end'   => '</div>',
+            ),
+           'subscript'   => array(
+                'begin'      => '<sub>',
+                'end'        =>  '</sub>',
+            ),
+            'superscript'=> array(
+                'begin'      => '<sup>',
+                'end'        =>  '</sup>',
+            ),
+            'headings' => null,
+            'h5' => array(
+                'begin' => '<h6>',
+                'end'   => '</h6>',
+            ),
+            'h4' => array(
+                'begin' => '<h5>',
+                'end'   => '</h5>',
+            ),
+            'h3' => array(
+                'begin' => '<h4>',
+                'end'   => '</h4>',
+            ),
+            'h2' => array(
+                'begin' => '<h3>',
+                'end'   => '</h3>',
+            ),
+            'h1' => array(
+                'begin' => '<h2>',
+                'end'   => '</h2>',
+            ),
+            'youtube' => array(
+                'begin' => '<object width="640" height="390"><param name="allowScriptAccess" value="always"></param><embed src="https://www.youtube.com/v/',
+                'end'   => '?version=3&autoplay=1" type="application/x-shockwave-flash" allowscriptaccess="always" width="640" height="390"></embed></object>'
+            )
+            // the iframe solution makes problem with the Dizkus edit/quote buttons
+            /*'youtube' => array(
+                'begin' => '<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/',
+                'end'   => '" frameborder="0">'
+            )*/
+        );
+        
     }
     
     

@@ -58,11 +58,6 @@ class LuMicuLa_Language_Markdown extends LuMicuLa_Language_Common
                 'func' => true
 
             ),
-            /*'list' => array(
-                'begin' => '[list] [*]',
-                'end'   => '[/list]',
-                'func'  => '[list]VALUE[/list]',
-            ),*/
             'bold' => array(
                 'begin' => '**',
                 'end'   => '**',
@@ -83,66 +78,15 @@ class LuMicuLa_Language_Markdown extends LuMicuLa_Language_Common
                     ),
                  ),
             ),
-            /*'underline' => array(
-                'begin' => '[u]',
-                'end'   => '[/u]',
-            ),
             'strikethrough' => array(
-                'begin' => '[s]',
-                'end'   => '[/s]',
-            ),*/
+                'begin' => '~~',
+                'end'   => '~~',
+            ),
             'hr' => array(
                 'begin' => '* * *',
                 'inner' => '',
                 'end'   => '',
             ),
-            /*'mark' => array(
-                'begin' => '[mark]',
-                'end'   => '[/mark]',
-            ),
-            'center' => array(
-                'begin' => '[center]',
-                'end'   => '[/center]',
-            ),
-            'size' => array(
-                'begin' => '[size=VALUE]',
-                'end'   => '[/size]',
-            ),
-            'table' => array(
-                'begin' => '[table][tr][td]',
-                'end'   => '[/td][/tr][/table]',
-                'subitems' => array(
-                    'table' => array(
-                        'begin' => '[table]',
-                        'end'   => '[/table]',
-                    ),
-                    'tr' => array(
-                        'begin' => '[tr]',
-                        'end'   => '[/tr]',
-                    ),
-                    'td' => array(
-                        'begin' => '[td]',
-                        'end'   => '[/td]',
-                    ),
-                 ),
-                
-            ),
-            'color' => array(
-                'begin' => '[color=VALUE]',
-                'end'   => '[/color]',
-            ),
-            'youtube' => array(
-                'begin' => '[youtube]',
-                'end'   => '[/youtube]',
-            ),
-            'subscript'   => array(
-                'begin' => '[sub]',
-                'end'   => '[/sub]',
-            ),
-            'superscript'=> array(
-                'begin' => '[sup]',
-                'end'   => '[/sup]',
-            ),*/
             'headings'  => array(
                 'subitems' => array(
                     'h5' => array(
@@ -167,20 +111,12 @@ class LuMicuLa_Language_Markdown extends LuMicuLa_Language_Common
                     ),
                  ),
              ),
-            'blockquote' => array(
+            'indent' => array(
                 'begin' => ">",
                 'end'   => "\n",
                 'pattern' => '/^>(.*?)\n/mi',
                 
-            ),            
-            /*'monospace' => array(
-                'begin' => '[monospace]',
-                'end'   => '[/monospace]',
             ),
-            'key' => array(
-                'begin' => "[key]",
-                'end'   => "[/key]",
-            ),*/
         );
     }
     

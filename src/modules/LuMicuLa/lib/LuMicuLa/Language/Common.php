@@ -34,6 +34,18 @@ class LuMicuLa_Language_Common extends Zikula_AbstractBase
     }
     
     
+    public function color($color, $text)
+    {
+        return '<span style="color:'.$color.'">'.$text.'</span>';
+    }
+    
+    
+    public function size($size, $text)
+    {
+        return '<font size='.$size.'">'.$text.'</font>';
+    }
+    
+    
     public function link($url, $title = null, $couldBeAPage = true)
     {    
 
