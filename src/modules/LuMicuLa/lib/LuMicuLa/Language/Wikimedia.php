@@ -14,6 +14,12 @@
 class LuMicuLa_Language_Wikimedia extends LuMicuLa_Language_Common
 {
     
+     public function __construct()
+    {
+        $this->protect = true;
+    }
+    
+    
     /**
      * Mediawiki elements
      *

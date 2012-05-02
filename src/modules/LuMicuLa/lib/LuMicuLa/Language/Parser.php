@@ -239,7 +239,7 @@ class LuMicuLa_Language_Parser
         
         // Remove our padding from the string..
         $this->text = substr($this->text, 1);
-        return '<div class="lumicula">'.$this->text.'</div>';
+        return '<div class="lumiculaParser">'.$this->text.'</div>';
     }
     
     
