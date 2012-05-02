@@ -140,7 +140,7 @@ class LuMicuLa_Language_Parser
                 'end'   => '</h2>',
             ),
             'youtube' => array(
-                'begin' => '<object width="640" height="390"></param><param name="allowScriptAccess" value="always"></param><embed src="https://www.youtube.com/v/',
+                'begin' => '<object width="640" height="390"><param name="allowScriptAccess" value="always"></param><embed src="https://www.youtube.com/v/',
                 'end'   => '?version=3&autoplay=1" type="application/x-shockwave-flash" allowscriptaccess="always" width="640" height="390"></embed></object>'
             )
             // the iframe solution makes problem with the Dizkus edit/quote buttons
