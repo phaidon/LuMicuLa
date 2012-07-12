@@ -26,8 +26,14 @@
 
     
     <div class="z-formrow">
-        {formlabel for="imageViewer" __text="Javascript pop-ups for images"}
+        {formlabel for="imageViewer" __text="Shrink size"}
         {formintinput id='link_shrinksize'}
+    </div>
+
+
+    <div class="z-formrow">
+        {formlabel for="sceditor" __text="Use SCeditor for BBCode"}
+        {formcheckbox id='sceditor'}
     </div>
     
     

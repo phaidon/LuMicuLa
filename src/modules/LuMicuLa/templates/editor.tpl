@@ -65,4 +65,4 @@
     var bar = document.getElementById('lumicula_editor');
     var parentDiv = {{$textfieldname}}.parentNode;
     parentDiv.insertBefore(bar, {{$textfieldname}});
- </script>
+</script>

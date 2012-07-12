@@ -80,8 +80,15 @@ class LuMicuLa_HookHandler_Lml extends Zikula_Hook_AbstractHandler
                    ->assign('smilies',       $smilies)
                    ->assign('items',         $elements)
                    ->assign('quote',         false);
-        
-        $response = new Zikula_Response_DisplayHook('provider_area.ui.lumicula.lml', $this->view, 'editor.tpl');
+
+
+        if ($editor_settings['language'] == 'BBCode' && ModUtil::getVar($this->name, 'sceditor', false)) {
+            $template = 'sceditor.tpl';
+        } else {
+            $template = 'editor.tpl';
+        }
+
+        $response = new Zikula_Response_DisplayHook('provider_area.ui.lumicula.lml', $this->view, $template);
         $hook->setResponse($response);
     }
 
