@@ -33,6 +33,36 @@ class LuMicuLa_Entity_LuMicuLa extends Zikula_EntityAccess
      * @ORM\Column(type="array", nullable="true")
      */
     private $elements = null;
+
+    /**
+     * The following are annotations which define the allTextAreas field.
+     *
+     * @ORM\Column(type="boolean")
+     */
+    private $allTextAreas = true;
+
+    /**
+     * The following are annotations which define the textAreaNames field.
+     *
+     * @ORM\Column(type="array")
+     */
+    private $textAreaNames = array();
+
+
+
+    /**
+     * The following are annotations which define the allTextAreas field.
+     *
+     * @ORM\Column(type="boolean")
+     */
+    private $allFunctions = true;
+
+    /**
+     * The following are annotations which define the textAreaNames field.
+     *
+     * @ORM\Column(type="array")
+     */
+    private $functionNames = array();
     
 
     /**
@@ -62,12 +92,69 @@ class LuMicuLa_Entity_LuMicuLa extends Zikula_EntityAccess
     {
         return $this->smilies;
     }
-    
-    
-    public function setAll($data) {
-        foreach($data as $key => $value) {
-            $this->$key = $value;
-        }
+
+    public function getAllTextAreas()
+    {
+        return $this->allTextAreas;
+    }
+
+    public function getTextAreaNames()
+    {
+        return $this->textAreaNames;
+    }
+
+
+    public function getAllFunctions()
+    {
+        return $this->allFunctions;
+    }
+
+    public function getFunctionNames()
+    {
+        return $this->functionNames;
+    }
+
+
+    public function setModname($modname)
+    {
+        return $this->modname = $modname;
+    }
+
+    public function setLanguage($language)
+    {
+        return $this->language = $language;
+    }
+
+    public function setElements($elements)
+    {
+        return $this->elements = $elements;
+    }
+
+
+    public function setSmilies($smilies)
+    {
+        return $this->smilies = $smilies;
+    }
+
+    public function setAllTextAreas($allTextAreas)
+    {
+        return $this->allTextAreas = $allTextAreas;
+    }
+
+    public function setTextAreaNames($textAreaNames)
+    {
+        return $this->textAreaNames = $textAreaNames;
+    }
+
+
+    public function setAllFunctions($allFunctions)
+    {
+        return $this->allFunctions = $allFunctions;
+    }
+
+    public function setFunctionNames($functionNames)
+    {
+        return $this->functionNames = $functionNames;
     }
     
     

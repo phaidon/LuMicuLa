@@ -1,6 +1,6 @@
 {pageaddvar name='javascript' value='jquery'}
-{pageaddvar name="javascript" value="modules/LuMicuLa/javascript/SCEditor/jquery.sceditor.min.js"}
-{pageaddvar name="stylesheet" value="modules/LuMicuLa/javascript/SCEditor/jquery.sceditor.default.min.css"}
+{pageaddvar name="javascript" value="modules/LuMicuLa/javascript/SCEditor/jquery.sceditor.js"}
+{pageaddvar name="javascript" value="modules/LuMicuLa/javascript/SCEditor/jquery.sceditor.bbcode.js"}
 {pageaddvar name="stylesheet" value="modules/LuMicuLa/javascript/SCEditor/themes/default.min.css"}
 
 
@@ -15,4 +15,5 @@
 
         initEditor();
     });
+
 </script>

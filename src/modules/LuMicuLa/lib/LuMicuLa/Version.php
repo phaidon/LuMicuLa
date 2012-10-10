@@ -34,12 +34,11 @@ class LuMicuLa_Version extends Zikula_AbstractVersion
     
     protected function setupHookBundles()
     {
-        $bundle = new Zikula_HookManager_ProviderBundle($this->name, 'provider.lumicula.ui_hooks.lml', 'ui_hooks', __('LuMicuLa editor'));
-        $bundle->addServiceHandler('display_view', 'LuMicuLa_HookHandler_Lml', 'ui_view', 'lumicula.lml');
-        $this->registerHookProviderBundle($bundle);    
-
-        
-        $bundle = new Zikula_HookManager_ProviderBundle($this->name, 'provider.lumicula.filter_hooks.lml', 'filter_hooks', __('LuMicuLa transform'));
+        $bundle = new Zikula_HookManager_ProviderBundle(
+            $this->name,
+            'provider.lumicula.filter_hooks.lml',
+            'filter_hooks', __('LuMicuLa transform')
+        );
         $bundle->addStaticHandler('filter', 'LuMicuLa_HookHandler_Lml', 'filter', 'lumicula.lml');
         $this->registerHookProviderBundle($bundle);    
     }

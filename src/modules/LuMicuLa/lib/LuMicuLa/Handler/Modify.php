@@ -13,50 +13,51 @@
 
 class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
 {
-    private $moduleSettings;
+    private $_moduleSettings;
 
 
     function initialize(Zikula_Form_View $view)
     {
         $view->caching = false;
         
-        $modname = FormUtil::getPassedValue('id', null, "GET", FILTER_SANITIZE_STRING);        
-        if ($modname) {
-            $view->assign('templatetitle', $this->__('Modify module settings').': '.$modname);
-            $view->assign('create', false);
-            $this->moduleSettings = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
-            if ($this->moduleSettings) {
-                $view->assign($this->moduleSettings->toArray());
-                $view->assign($this->moduleSettings->getElements());
-                
-            } else {
-                return LogUtil::registerError($this->__f('Article with id %s not found', $id));
+        $modname = FormUtil::getPassedValue('id', null, "GET", FILTER_SANITIZE_STRING);
+
+        if (empty($modname) || !ModUtil::available($modname)) {
+            return LogUtil::registerArgsError();
+        }
+
+
+        $view->assign('templatetitle', $this->__('Modify module settings').': '.$modname);
+        $view->assign('create', false);
+        $this->_moduleSettings = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
+        if (!$this->_moduleSettings) {
+            $this->_moduleSettings = new LuMicuLa_Entity_LuMicuLa();
+            $this->_moduleSettings->setModname($modname);
+        }
+
+
+        $data = $this->_moduleSettings->toArray();
+        $data['textAreaNames'] = implode(',', $data['textAreaNames']);
+        $data['functionNames'] = implode(',', $data['functionNames']);
+        $view->assign($data);
+
+
+        $bindedHooks = HookUtil::getSubscriberAreasByOwner($modname);
+        if (count($bindedHooks) == 0) {
+            return LogUtil::registerError($this->__('The chosen module has no filters!'));
+        }
+        foreach ($bindedHooks as $key => $value) {
+            $hook = explode('.', $value);
+            $hookType = $hook[2];
+            $binded = HookUtil::getBindingBetweenAreas($value, 'provider.lumicula.filter_hooks.lml');
+            if ($hookType != 'filter_hooks' || !$binded) {
+                unset($bindedHooks[$key]);
             }
-        } else {
-            $view->assign('templatetitle', $this->__('Create module settings'));
-            $view->assign('create', true);
-            $all_moduls = ModUtil::getAllMods();
-            $lml_moduls = $this->entityManager->getRepository('LuMicuLa_Entity_LuMicuLa')->findAll();
-            foreach($lml_moduls as $lml_module) {
-                $lml_module = $lml_module->toArray();
-                $modame = $lml_module['modname'];
-                if(array_key_exists($modame, $all_moduls)) {
-                    unset($all_moduls[$modame]);
-                }
-            }
-            $modules = array();
-            foreach($all_moduls as $modname => $module) {
-                $displayname = $module['displayname'];
-                $modules[$displayname] = array(
-                    'value' => $modname,
-                    'text'  => $displayname
-                );
-            }
-            sort($modules);
-            $view->assign('modules', $modules);
-            
-        } 
-        
+
+        }
+        $view->assign('bindedHooks', implode(', ', $bindedHooks));
+
+
         $lmls = array(
             array('value' => 'BBCode',    'text' => 'BBCode'),
             array('value' => 'Creole',    'text' => 'Creole'),
@@ -66,9 +67,9 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         );
         $view->assign('lmls', $lmls);
         
-        
         $elements = ModUtil::apiFunc($this->name, 'user', 'elements');
-        $view->assign('elements', $elements);
+
+        $view->assign('allElements', $elements);
 
         return true;
     }
@@ -76,7 +77,16 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
 
     function handleCommand(Zikula_Form_View $view, &$args)
     {
+        $moduleSettings = $this->_moduleSettings;
+
         if ($args['commandName'] == 'cancel') {
+            $url = ModUtil::url('LuMicuLa', 'admin', 'main');
+            return $view->redirect($url);
+        }
+
+        if ($args['commandName'] == 'delete') {
+            $this->entityManager->remove($moduleSettings);
+            $this->entityManager->flush();
             $url = ModUtil::url('LuMicuLa', 'admin', 'main');
             return $view->redirect($url);
         }
@@ -87,26 +97,16 @@ class LuMicuLa_Handler_Modify extends Zikula_Form_AbstractHandler
         }
 
         $ok = $view->isValid();
-        $data0 = $view->getValues();
-
-
-
-        
-        // switch between edit and create mode
-        if (!$this->moduleSettings) {
-            $data['modname'] = $data0['modname'];
-            unset($data0['modname']);
-            $this->moduleSettings = new LuMicuLa_Entity_LuMicuLa();
+        if (!$ok) {
+            return false;
         }
-        
-        $data['language'] = $data0['language'];
-        unset($data0['language']);
-        $data['smilies'] = $data0['smilies'];
-        unset($data0['smilies']);
-        $data['elements'] = $data0;        
-        
-        $this->moduleSettings->setAll($data);
-        $this->entityManager->persist($this->moduleSettings);
+        $data = $view->getValues();
+
+        $data['textAreaNames'] = explode(',', $data['textAreaNames']);
+        $data['functionNames'] = explode(',', $data['functionNames']);
+
+        $moduleSettings->merge($data);
+        $this->entityManager->persist($moduleSettings);
         $this->entityManager->flush();
 
 

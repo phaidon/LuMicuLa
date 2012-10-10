@@ -62,7 +62,15 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
     public function modify()
     {
         $form = FormUtil::newForm($this->name, $this);
+
         return $form->execute('admin/modify.tpl', new LuMicuLa_Handler_Modify());
+    }
+
+    public function modify2()
+    {
+        $modname = FormUtil::getPassedValue('id', null, "POST", FILTER_SANITIZE_STRING);
+
+        return System::redirect(ModUtil::url($this->name, 'admin', "modify", array('id' => $modname)));
     }
     
     /**
@@ -78,25 +86,70 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
      *
      * @return string HTML string containing the rendered template.
      *
-     * @throws Zikula_Exception_Forbidden Thrown if the current user does not have moderate access, or if the method of accessing this function is improper.
+     * @throws Zikula_Exception_Forbidden Thrown if the current user does not have moderate access, or if the method of
+     * accessing this function is improper.
      */
-    
      public function modules()
      {
-        if (!SecurityUtil::checkPermission('LuMicuLa::', '::', ACCESS_ADMIN)) {
-            throw new Zikula_Exception_Forbidden();
-        }
+         if (!SecurityUtil::checkPermission('LuMicuLa::', '::', ACCESS_ADMIN)) {
+             throw new Zikula_Exception_Forbidden();
+         }
     
-        $allElements = ModUtil::apiFunc($this->name, 'user', 'elements');
-        $allModuleSettings = $this->entityManager->getRepository('LuMicuLa_Entity_LuMicuLa')->findAll();
-        
+         $allElements = ModUtil::apiFunc($this->name, 'user', 'elements');
+         $allModuleSettings = $this->entityManager->getRepository('LuMicuLa_Entity_LuMicuLa')->findAll();
+
+         $allModules = ModUtil::getAllMods();
+         foreach ($allModuleSettings as $moduleSetting) {
+             $modname = $moduleSetting->getModname();
+             unset($allModules[$modname]);
+         }
+
+         foreach ($allModules as $modname => $modinfo) {
+             $subscriberHooks = HookUtil::getSubscriberAreasByOwner($modname);
+             foreach ($subscriberHooks as $key => $value) {
+                 $hook = explode('.', $value);
+                 $hookType = $hook[2];
+                 if ($hookType != 'filter_hooks') {
+                     unset($subscriberHooks[$key]);
+                 }
+             }
+             if (count($subscriberHooks) == 0) {
+                 unset($allModules[$modname]);
+             }
+         }
+
+         $this->view->assign('modules', $allModules);
+
+
         return $this->view->assign('mods', $allModuleSettings)
                           ->assign('elements', $allElements)
                           ->fetch('admin/modules.tpl');
-       
      }
-     
-     
+
+
+     public function deleteModuleSettings()
+     {
+         if (!SecurityUtil::checkPermission('LuMicuLa::', '::', ACCESS_ADMIN)) {
+             throw new Zikula_Exception_Forbidden();
+         }
+
+         $url = ModUtil::url($this->name, 'admin', 'modules');
+         $modname = FormUtil::getPassedValue('id', null, "GET", FILTER_SANITIZE_STRING);
+         if (empty($modname)) {
+             return System::redirect($url);
+         }
+         $moduleSettings = $this->entityManager->find('LuMicuLa_Entity_LuMicuLa', $modname);
+         if (!$moduleSettings) {
+             return System::redirect($url);
+         }
+         $this->entityManager->remove($moduleSettings);
+         $this->entityManager->flush();
+
+         return System::redirect($url);
+
+     }
+
+
      public function tags()
      {
         if (!SecurityUtil::checkPermission('LuMicuLa::', '::', ACCESS_ADMIN)) {
@@ -104,7 +157,7 @@ class LuMicuLa_Controller_Admin extends Zikula_AbstractController
         }
 
         $tags = ModUtil::apiFunc($this->name, 'user', 'supportedTags');
-        return $this->view->assign('tags',     $tags)
+        return $this->view->assign('tags', $tags)
                           ->fetch('admin/tags.tpl');
        
      }

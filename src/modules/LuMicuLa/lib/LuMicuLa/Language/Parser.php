@@ -48,29 +48,29 @@ class LuMicuLa_Language_Parser
 
     
     
-    public function setModname($modname) {        
-        
+    public function setModname($modname)
+    {
         // get the light markup language of the current module
-        if(!is_array($this->languages) or !array_key_exists($modname, $this->languages)) {
+        if (!is_array($this->languages) or !array_key_exists($modname, $this->languages)) {
             $em = ServiceUtil::getService('doctrine.entitymanager');
-            $editor_settings = $em->find('LuMicuLa_Entity_LuMicuLa', $modname);
-            $editor_settings = $editor_settings->toArray();
-            $this->languages[$modname] = $editor_settings;
+            $editorSettings = $em->find('LuMicuLa_Entity_LuMicuLa', $modname);
+            $editorSettings = $editorSettings->toArray();
+            $this->languages[$modname] = $editorSettings;
         }
 
-        $editor_settings = $this->languages[$modname];                
-        $language = $editor_settings['language'];   
-        $className = "LuMicuLa_Language_".$language;    
+        $editorSettings = $this->languages[$modname];
+        $language = $editorSettings['language'];
+        $className = "LuMicuLa_Language_".$language;
+
         $this->l = new $className;
         $this->elements = $this->l->elements();
         
     }
     
     
-    public function parse() {
-                
-        
-        
+    public function parse()
+    {
+
         $this->codeblocks = array();
         $this->categories = array();
         $this->nomarkups  = array();
@@ -120,25 +120,18 @@ class LuMicuLa_Language_Parser
     // --- replace ---------------------------------------------------------- \\
     // ---------------------------------------------------------------------- \\
     
-    
-    
-    private function replace($elements) {
-        
-        
-        foreach($elements as $tagID => $tagData) {
-            
-            
-            if(!array_key_exists($tagID, $this->replaces) || $tagID == 'categoty' || isset($tagData['noreplace'])) {
+    private function replace($elements)
+    {
+        foreach ($elements as $tagID => $tagData) {
+            if (!array_key_exists($tagID, $this->replaces) || $tagID == 'categoty' || isset($tagData['noreplace'])) {
                 continue;
             }
             $replaceData = $this->replaces[$tagID];
             
-            
-            
-            if($tagID == 'code' || $tagID == 'nomarkup') {
-                $tagData['begin']   = preg_quote($tagData['begin'],'/');
-                $tagData['begin']   = str_replace("BOL", "^", $tagData['begin']);
-                $tagData['end']     = preg_quote($tagData['end'],  '/');
+            if ($tagID == 'code' || $tagID == 'nomarkup') {
+                $tagData['begin'] = preg_quote($tagData['begin'], '/');
+                $tagData['begin'] = str_replace("BOL", "^", $tagData['begin']);
+                $tagData['end']   = preg_quote($tagData['end'], '/');
                 $pattern = "/".$tagData['begin']."(.*?)".$tagData['end']."/si";
 
                 

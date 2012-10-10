@@ -14,10 +14,13 @@
 class LuMicuLa_Installer extends Zikula_AbstractInstaller
 {
     /**
-    * initialise the template module
-    * This function is only ever called once during the lifetime of a particular
-    * module instance
-    */
+     * initialise the template module
+     *
+     * This function is only ever called once during the lifetime of a particular
+     * module instance
+     *
+     * @return boolean
+     */
     public function install()
     {
          // create table
@@ -31,19 +34,28 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
         }
 
         $this->defaultdata();
-        
+
+        EventUtil::registerPersistentModuleHandler(
+            'LuMicuLa',
+            'core.postinit',
+            array('LuMicuLa_Listeners', 'coreinit')
+        );
+
         // create hook
         HookUtil::registerProviderBundles($this->version->getHookProviderBundles());
 
         // Initialisation successful
         return true;
     }
-    
-    
+
+
     /**
-     * Provide default data.
+     * Create the default data for the users module.
      *
-     * @return void
+     * This function is only ever called once during the lifetime of a particular
+     * module instance.
+     *
+     * @return boolean
      */
     protected function defaultdata()
     {
@@ -53,7 +65,7 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
             'language' => 'Creole',
             'elements' => array('bold' => true)
         );
-        $i->setAll($data);
+        $i->merge($data);
         $this->entityManager->persist($i);
         
         
@@ -63,50 +75,56 @@ class LuMicuLa_Installer extends Zikula_AbstractInstaller
             'language' => 'Wikka',
             'elements' => array('bold' => true)
         );
-        $i->setAll($data);
+        $i->merge($data);
         $this->entityManager->persist($i);
         
         $this->entityManager->flush();
 
         $this->setVar('syntaxHighlighters', 'syntaxhighlighter');
         $this->setVar('imageViewer', true);
-        
     }
 
     /**
-    * Upgrade the errors module from an old version
-    *
-    * This function must consider all the released versions of the module!
-    * If the upgrade fails at some point, it returns the last upgraded version.
-    *
-    * @param        string   $oldVersion   version number string to upgrade from
-    * @return       mixed    true on success, last valid version string or false if fails
-    */
+     * Upgrade the errors module from an old version
+     *
+     * This function must consider all the released versions of the module!
+     * If the upgrade fails at some point, it returns the last upgraded version.
+     *
+     * @param string $oldversion Version number string to upgrade from.
+     *
+     * @return mixed True on success, last valid version string or false if fails.
+     */
     public function upgrade($oldversion)
     {
-        // Update successful
+        // Upgrade succesful
         return true;
     }
 
     /**
-    * delete the errors module
-    * This function is only ever called once during the lifetime of a particular
-    * module instance
-    */
+     * delete the errors module
+     *
+     * This function is only ever called once during the lifetime of a particular
+     * module instance
+     *
+     * @return boolean
+     */
     public function uninstall()
     {
-         // drop tables
-        DoctrineHelper::dropSchema($this->entityManager, array(
-            'LuMicuLa_Entity_LuMicuLa'
-        ));
-        
+        // drop tables
+        DoctrineHelper::dropSchema($this->entityManager, array('LuMicuLa_Entity_LuMicuLa'));
+
+        EventUtil::unregisterPersistentModuleHandler(
+            'LuMicuLa',
+            'core.postinit',
+            array('LuMicuLa_Listeners', 'coreinit')
+        );
+
         // Delete any module variables
         $this->delVars();
         HookUtil::unregisterProviderBundles($this->version->getHookProviderBundles());
 
         // Deletion successful
         return true;
-
     }
 }
 

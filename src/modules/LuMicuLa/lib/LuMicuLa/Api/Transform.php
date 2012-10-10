@@ -33,23 +33,14 @@ class LuMicuLa_Api_Transform extends Zikula_AbstractApi
     
     public function transform($args)
     { 
-        if(empty($args['modname']) or empty($args['text'])) {
+        if (empty($args['modname']) or empty($args['text'])) {
             return $args['text'];
         }
-        
-        
-              
+
         $parser = new LuMicuLa_Language_Parser();
         $parser->setText($args['text']);
         $parser->setModname($args['modname']);
         return $parser->parse();
-        
-        
-        
-        //$message = $this->transform_quotes($message);
-
-        
-        
 
     }
     
