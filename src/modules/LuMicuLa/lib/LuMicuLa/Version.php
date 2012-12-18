@@ -25,7 +25,8 @@ class LuMicuLa_Version extends Zikula_AbstractVersion
         $meta['author']         = 'Fabian Wuertz';
         $meta['contact']        = 'fabian.wuertz.org';
         // recommended and required modules
-        $meta['core_min'] = '1.3.0'; // requires minimum 1.3.0 or later
+        $meta['core_min'] = '1.3.0'; // requires minimum 1.3.0 - 1.3.99 
+        $meta['core_max'] = '1.3.99';
         $meta['dependencies'] = array();
         $meta['capabilities'] = array(HookUtil::PROVIDER_CAPABLE => array('enabled' => true));
 
