@@ -51,8 +51,8 @@ class LuMicuLa_Language_BBCode extends LuMicuLa_Language_Common
                 'end'   => '[/page]',
             ),
             'link' => array(
-                'begin' => '[url]',
-                'inner' => __('http://www.example.com'),
+                'begin' => '[url='.__('http://www.example.com').']',
+                'inner' => __('Title'),
                 'end'   => '[/url]',
                 'pattern' => '/\[url=?(.*?)\](.*?)\[\/url\]/mi',
                 'func' => true
