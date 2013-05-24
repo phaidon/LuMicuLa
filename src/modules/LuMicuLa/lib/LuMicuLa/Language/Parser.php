@@ -322,7 +322,7 @@ class LuMicuLa_Language_Parser
                       '     caption: true,'.
                       '     modal: true,'.
                       '     langLabels: {'.
-                      "         close: 'Close this box',". 
+                      "         close: 'Close this box'". 
                       '     }'. 
                       '});'.
                       '</script>';
