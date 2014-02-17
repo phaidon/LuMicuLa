@@ -86,7 +86,6 @@ class LuMicuLa_Language_Parser
         // bbencode_code() all depend on it.
         
         $this->extractCategories();
-        $this->transformAbandonedLinks();
         //$this->extractUrls();
         $this->replace($this->elements);
         $this->transformSmilies();
@@ -95,6 +94,7 @@ class LuMicuLa_Language_Parser
         
         $this->text = str_replace("</blockquote><blockquote>", "\n", $this->text);
         $this->transform_list_post();
+        $this->transformAbandonedLinks();
         $this->text = str_replace('<br>', '<br />', $this->text);
         $this->text = str_replace("<br />\n", "\n", $this->text);
         $this->text = str_replace("\n", "<br />\n", $this->text);
@@ -268,9 +268,42 @@ class LuMicuLa_Language_Parser
     
      public function transformAbandonedLinks() {
         
-        $this->text = preg_replace(
-            "#([[:space:]](http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s[[:space:]])#ie",
-            "' <a href=\"$1\" class=\"externalLink\">$3</a>$4 '",
+       $this->text = preg_replace_callback(
+            "#((\<a(.*?)href=\")|(\"))?((http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s[[:space:]])(>(.*?)(\<\/a\>))?#i",
+            function ($matches) {
+                if(!preg_match('#' . System::getHomepageUrl() . '(.*?)#', $matches[5])) {
+                    $class = 'externalLink';
+                    $target = 'blank';
+                } else {
+                    $class = null;
+                    $target = null;
+                }
+                if($matches[3] == '') {
+                    $matches[3] = ' ';
+                }
+                if(!preg_match('#target=#', $matches[3])) {
+                    if($target != null) {
+                        $matches[3] .= 'target="' . $target . '" ';
+                    }
+                }
+                if(!preg_match('#class=#', $matches[3])) {
+                    if($class != null) {
+                        $matches[3] .= 'class="' . $class . '" ';
+                    }
+                }
+                if(preg_match('#' . PHP_EOL . '#', $matches[8])) {
+                    $newline = "\n";
+                } else {
+                    $newline = '';
+                }
+                if($matches[10] == '') {
+                    $matches[10] = $matches[5];
+                }
+                $result = '<a' . $matches[3] . 'href="' . $matches[5] . '">' . $matches[10] . '</a>' . $newline;
+                return $result;
+                print_r($matches);
+                return 'http://giz-berlin.de';
+            },
             $this->text
         );
     }
