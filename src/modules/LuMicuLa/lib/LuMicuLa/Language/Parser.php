@@ -301,8 +301,6 @@ class LuMicuLa_Language_Parser
                 }
                 $result = '<a' . $matches[3] . 'href="' . $matches[5] . '">' . $matches[10] . '</a>' . $newline;
                 return $result;
-                print_r($matches);
-                return 'http://giz-berlin.de';
             },
             $this->text
         );
