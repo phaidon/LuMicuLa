@@ -269,7 +269,7 @@ class LuMicuLa_Language_Parser
      public function transformAbandonedLinks() {
         
        $this->text = preg_replace_callback(
-            "#((\<a(.*?)href=\")|(\"))?((http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s[[:space:]])(>(.*?)(\<\/a\>))?#i",
+            "#((\<a(.*?)href=\")|(\"))?((http|https|ftp)://(\S*?\.\S*?))(\s|\"|'|:|\<|$|\.\s[[:space:]])(>(.*?)(\<\/a\>))?#i",
             function ($matches) {
                 if(!preg_match('#' . System::getHomepageUrl() . '(.*?)#', $matches[5])) {
                     $class = 'externalLink';
@@ -291,7 +291,10 @@ class LuMicuLa_Language_Parser
                         $matches[3] .= 'class="' . $class . '" ';
                     }
                 }
-                if(preg_match('#' . PHP_EOL . '#', $matches[8])) {
+                //only if we have a raw-link (not in an <a>-tag)
+                if(count($matches) != 9) {
+                    $matches[8] = '';
+                } elseif(preg_match('#' . PHP_EOL . '#', $matches[8])) {
                     $newline = "\n";
                 } else {
                     $newline = '';
@@ -299,7 +302,7 @@ class LuMicuLa_Language_Parser
                 if($matches[10] == '') {
                     $matches[10] = $matches[5];
                 }
-                $result = '<a' . $matches[3] . 'href="' . $matches[5] . '">' . $matches[10] . '</a>' . $newline;
+                $result = '<a' . $matches[3] . 'href="' . $matches[5] . '">' . $matches[10] . '</a>' . $matches[8] . $newline;
                 return $result;
             },
             $this->text
