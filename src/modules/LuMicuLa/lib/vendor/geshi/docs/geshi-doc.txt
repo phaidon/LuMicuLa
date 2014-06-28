@@ -199,7 +199,7 @@ Top | Contents | Next | Previous
 GeSHi is nothing more than a PHP class with related language support files. Those of you familiar with PHP can then guess how easy the installation will be: simply copy it into your include path somewhere. You can put it wherever you like in this include path. I recommend that you put the language files in a subdirectory of your include path too - perhaps the same subdirectory that geshi.php is in. Remember this path for later.
 
 If you don't know what an include path is, don't worry. Simply copy GeSHi to your webserver. So for example, say your site is at http://mysite.com/myfolder, you can copy GeSHi to your site so the directory structure is like this:
-LuMicuLa
+
 http://mysite.com/myfolder/geshi/[language files]
 http://mysite.com/myfolder/geshi.php
 
