@@ -27,7 +27,8 @@ class LuMicuLa_Listeners
         $name = 'LuMicuLa';
 
         $modinfo1 = ModUtil::getInfoFromName($name);
-        $modinfo2 = LuMicuLa_Version::getMetaData();
+        $version = new LuMicuLa_Version();
+        $modinfo2 = $version->getMetaData();
 
         if ($modinfo1['version'] != $modinfo2['version']) {
             return;
@@ -36,6 +37,10 @@ class LuMicuLa_Listeners
         $view = Zikula_View::getInstance('LuMicuLa');
 
         $modname = FormUtil::getPassedValue('module', null, "GET", FILTER_SANITIZE_STRING);
+
+        if(empty($modname)) {
+            return;
+        }
 
 
         $em = ServiceUtil::getService('doctrine.entitymanager');

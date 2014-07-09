@@ -16,21 +16,21 @@ class LuMicuLa_Entity_LuMicuLa extends Zikula_EntityAccess
      * The following are annotations which define the fid field.
      *
      * @ORM\Id
-     * @ORM\Column(type="string", length=64, nullable="false")
+     * @ORM\Column(type="string", length=64, nullable=false)
      */
     private $modname;
     
     /**
      * The following are annotations which define the language field.
      *
-     * @ORM\Column(type="string", length=16, nullable="true")
+     * @ORM\Column(type="string", length=16, nullable=true)
      */
     private $language = null;
 
     /**
      * The following are annotations which define the elements field.
      *
-     * @ORM\Column(type="array", nullable="true")
+     * @ORM\Column(type="array", nullable=true)
      */
     private $elements = null;
 
