@@ -22,7 +22,7 @@ function LuMicuLa(textfield, editorOptions, smilies, quote) {
                 select.style.height = "22px";
                 select.style.marginTop = "-15px";
                 select.style.verticalAlign = "middle";
-                var onchange ="insertAtCursor2("+textfieldname+", this.value);this.selectedIndex=0;return false;";
+                var onchange ="insertAtCursor2('"+textfieldname+"', this.value);this.selectedIndex=0;return false;";
                 select.setAttribute('onchange', onchange);
                 select.options[select.length] = new Option('Heading', 0);
                 for (var i in obj['subitems']) {
@@ -32,9 +32,8 @@ function LuMicuLa(textfield, editorOptions, smilies, quote) {
                 bar.appendChild(select);
             } else {
                 var img = document.createElement('img')
-                console.log('Zikula.Config.baseURL');
                 img.setAttribute('src', Zikula.Config.baseURL+'modules/LuMicuLa/images/'+obj['icon']);
-                var onclick ="insertAtCursor("+textfieldname+", '"+obj['begin']+"', '"+obj['inner']+"', '"+obj['end']+"');return false";
+                var onclick ="insertAtCursor('"+textfieldname+"', '"+obj['begin']+"', '"+obj['inner']+"', '"+obj['end']+"');return false";
                 img.setAttribute('onclick', onclick);
                 bar.appendChild(img);
 
@@ -76,7 +75,7 @@ function LuMicuLa(textfield, editorOptions, smilies, quote) {
         bar.appendChild(img);
     }
 
-    var width = $(textfieldname).getWidth()+10;
+    var width = document.getElementById(textfieldname).getWidth()+19;
     container.style.width = width+'px';
 
     var parentDiv = textfield.parentNode;
@@ -86,9 +85,10 @@ function LuMicuLa(textfield, editorOptions, smilies, quote) {
 }
 
 
-function insertAtCursor(textfieldname, startTag, middleTag, endTag) {
+function insertAtCursor(textfieldname, startTag, middleTag, endTag)
+{
 
-    var textfield = $(textfieldname);
+    var textfield = document.getElementById(textfieldname);
 
     //IE support
     textfield.focus();
